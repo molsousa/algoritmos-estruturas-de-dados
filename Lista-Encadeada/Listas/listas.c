@@ -39,6 +39,8 @@ Lista* liberar_lista(Lista* l)
         aux = aux->prox;
         free(t);
     }
+	
+	free(l);
 
     return NULL;
 }

@@ -43,6 +43,8 @@ Fila* liberar_fila(Fila* f)
         f->primeiro = f->primeiro->prox;
         free(aux);
     }
+	
+	free(f);
 
     return NULL;
 }

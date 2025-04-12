@@ -46,6 +46,8 @@ Arvore* liberar_arvore(Arvore* raiz)
         return raiz;
 
     liberar_no(*raiz);
+	
+	free(raiz);
 
     return NULL;
 }

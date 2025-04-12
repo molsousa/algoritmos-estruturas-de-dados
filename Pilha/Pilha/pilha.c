@@ -42,6 +42,8 @@ Pilha* liberar_pilha(Pilha* p)
         p->topo = p->topo->prox;
         free(aux);
     }
+	
+	free(p);
 
     return NULL;
 }
