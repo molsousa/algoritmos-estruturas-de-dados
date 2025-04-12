@@ -14,6 +14,8 @@ struct no_tst{
 
 // Funcao para inserir elemento na arvore
 static Arv* inserir(Arv* arvore, char* palavra, int valor);
+// Funcao para remover uma palavra da arvore
+static Arv* remover_rec(Arv* arvore, char* nome);
 // Funcao para imprimir arvore Tst
 static void imprimir(Arv* arvore, char* palavra, int n);
 // Funcao para buscar nome inserindo nome
@@ -71,6 +73,46 @@ static Arv* inserir(Arv* arvore, char* palavra, int valor)
 
         else if(arvore->info < *palavra)
             arvore->dir = inserir(arvore->dir, palavra, valor);
+    }
+
+    return arvore;
+}
+
+// Funcao para remover uma palavra da arvore
+// Pre-condicao: arvore criada e vetor de char nao nulo
+// Pos-condicao: nenhuma
+void remover_palavra(Tst* arvore, char* nome)
+{
+    *arvore = remover_rec(*arvore, nome);
+}
+
+// Funcao para remover uma palavra da arvore
+static Arv* remover_rec(Arv* arvore, char* nome)
+{
+    if(arvore == NULL)
+        return arvore;
+
+    if(*nome < arvore->info)
+        arvore->esq = remover_rec(arvore->esq, nome);
+
+    else if(*nome > arvore->info)
+        arvore->dir = remover_rec(arvore->dir, nome);
+
+    else{
+        if(*(nome+1) == '\0'){
+            if(arvore->valor != -1){
+                arvore->valor = -1;
+                free(arvore);
+                return NULL;
+            }
+        }
+        else
+            arvore->meio = remover_rec(arvore->meio, nome+1);
+
+        if(arvore->meio == NULL && arvore->valor == -1){
+            free(arvore);
+            return NULL;
+        }
     }
 
     return arvore;

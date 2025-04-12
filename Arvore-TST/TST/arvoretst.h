@@ -16,6 +16,11 @@ Tst *criar_arvore();
 // Pos-condicao: nenhuma
 void inserir_nome(Tst* arvore, char* palavra, int valor);
 
+// Funcao para remover uma palavra da arvore
+// Pre-condicao: arvore criada e vetor de char nao nulo
+// Pos-condicao: nenhuma
+void remover_palavra(Tst* arvore, char* palavra);
+
 // Funcao para imprimir arvore Tst
 // Pre-condicao: arvore criada
 // Pos-condicao: nenhuma
