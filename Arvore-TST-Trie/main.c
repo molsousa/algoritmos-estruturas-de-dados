@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "TST/arvoretst.h"
+#include "TST-Trie/arvoretst.h"
 
 int main()
 {
