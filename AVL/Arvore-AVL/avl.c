@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "avl.h"
-#include "balanceamento.h"
+#include "Balanceamento/balanceamento.h"
 
 // Funcao para liberar arvore AVL
 static void liberar_no(No_AVL* raiz);
