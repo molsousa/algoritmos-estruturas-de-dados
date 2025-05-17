@@ -13,6 +13,14 @@ ArvoreRN* criar_arvore();
 
 ArvoreRN* liberar_arvore(ArvoreRN* raiz);
 
+int cor(No* no);
+
+void troca_cor(No* no);
+
+No* rotacionar_esquerda(No* no);
+
+No* rotacionar_direita(No* no);
+
 int inserir_no(ArvoreRN* raiz, int info);
 
 int remover_no(ArvoreRN* raiz, int info);
