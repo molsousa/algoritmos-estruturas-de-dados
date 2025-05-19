@@ -2,14 +2,16 @@
 
 int main()
 {
-    ArvoreRN* raiz = criar_arvore();
+    ArvoreRN* raiz;
 
-    inserir_no(raiz, 5);
+    raiz = criar_arvore();
+
+    inserir_no(raiz, 50);
+    inserir_no(raiz, 60);
+    inserir_no(raiz, 65);
     inserir_no(raiz, 10);
-    inserir_no(raiz, 15);
     inserir_no(raiz, 20);
-    inserir_no(raiz, 25);
-    inserir_no(raiz, 30);
+    inserir_no(raiz, 15);
 
     imprimir_arvore(raiz);
 
