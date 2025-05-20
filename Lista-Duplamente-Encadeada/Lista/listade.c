@@ -2,16 +2,23 @@
 #include <stdlib.h>
 #include "listade.h"
 
+// Estrutura para lista duplamente encadeada
 struct lista{
     int info;
     struct lista* ant;
     struct lista* prox;
 };
 
+// Funcao auxiliar para liberar cada elemento
 static void liberar_lista_cauda(Elem* l);
+// Funcao auxiliar para imprimir a ida
 static void rotina_ida(Elem *l);
+// Funcao auxiliar para imprimir a volta
 static void rotina_volta(Elem* l);
 
+// Funcao para criar lista
+// Pre-condicao: nenhum
+// Pos-condicao: retorna uma lista criada
 Lista* criar_lista()
 {
     Lista* novo = (Lista*) malloc(sizeof(Lista));
@@ -20,6 +27,9 @@ Lista* criar_lista()
     return novo;
 }
 
+// Funcao para liberar lista
+// Pre-condicao: lista criada
+// Pos-condicao: retorna nulo para ponteiro do tipo Lista
 Lista* liberar_lista(Lista* l)
 {
     if(l == NULL)
@@ -30,6 +40,8 @@ Lista* liberar_lista(Lista* l)
 
     return NULL;
 }
+
+// Funcao auxiliar para liberar cada elemento
 static void liberar_lista_cauda(Elem* l)
 {
     if(l == NULL)
@@ -40,6 +52,9 @@ static void liberar_lista_cauda(Elem* l)
     free(l);
 }
 
+// Funcao para inserir elemento
+// Pre-condicao: lista criada
+// Pos-condicao: insere elemento em cauda
 void inserir_elemento(Lista* l, int info)
 {
     Elem* novo = (Elem*) malloc(sizeof(Elem));
@@ -60,6 +75,54 @@ void inserir_elemento(Lista* l, int info)
     }
 }
 
+// Funcao para inserir elemento ordenado
+// Pre-condicao: lista criada
+// Pos-condicao: insere elemento de forma ordenada
+void inserir_elemento_ordenado(Lista* l, int info)
+{
+    Elem* novo = (Elem*) malloc(sizeof(Elem));
+    novo->info = info;
+    novo->prox = NULL;
+    novo->ant = NULL;
+
+    if(*l == NULL)
+        *l = novo;
+
+    else{
+        Elem* aux = *l;
+
+        while(aux->prox != NULL && aux->info <= info)
+            aux = aux->prox;
+
+        if(aux == *l && aux->info > info){
+            aux->ant = novo;
+            novo->prox = aux;
+            *l = novo;
+        }
+        else if(aux == *l && aux->info < info){
+            aux->prox = novo;
+            novo->ant = aux;
+        }
+        else{
+            Elem* p = aux->ant;
+
+            if(aux->prox == NULL && aux->info <= info){
+                aux->prox = novo;
+                novo->ant = aux;
+            }
+            else{
+                novo->prox = p->prox;
+                novo->ant = p;
+                p->prox = novo;
+                aux->ant = novo;
+            }
+        }
+    }
+}
+
+// Funcao para remover elemento
+// Pre-condicao: lista criada
+// Pos-condicao: remove elemeento da lista
 void remover_elemento(Lista* l, int info)
 {
     if(*l == NULL)
@@ -92,6 +155,9 @@ void remover_elemento(Lista* l, int info)
     free(aux);
 }
 
+// Funcao para imprimir lista
+// Pre-condicao: lista criada
+// Pos-condicao: imprime a lista na tela
 void imprimir_lista(Lista* l)
 {
     if(*l == NULL){
@@ -104,6 +170,9 @@ void imprimir_lista(Lista* l)
     imprimir_lista(&(*l)->prox);
 }
 
+// Funcao para imprimir a lista ida e volta
+// Pre-condicao: lista criada
+// Pos-condicao: imprime a lista na tela
 void imprimir_ida_volta(Lista* l)
 {
     printf("IDA:   ");
@@ -118,6 +187,7 @@ void imprimir_ida_volta(Lista* l)
     printf("\n");
 }
 
+// Funcao auxiliar para imprimir a ida
 static void rotina_ida(Elem *l)
 {
     if(l == NULL){
@@ -130,6 +200,7 @@ static void rotina_ida(Elem *l)
     rotina_ida(l->prox);
 }
 
+// Funcao auxiliar para imprimir a volta
 static void rotina_volta(Elem *l)
 {
     if(l == NULL){
