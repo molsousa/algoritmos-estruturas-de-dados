@@ -2,21 +2,20 @@
 
 int main()
 {
-    FILE* f = criar_arvore();
-    Cabecalho* c = ler_cabecalho(f);
+    FILE* f = fopen("Arvore.bin", "w+b");
+    criar_arvore(f);
 
-    inserir_no(f, c, 60);
-    inserir_no(f, c, 50);
-    inserir_no(f, c, 55);
-    inserir_no(f, c, 58);
-    inserir_no(f, c, 40);
-    inserir_no(f, c, 70);
-    inserir_no(f, c, 80);
-    inserir_no(f, c, 75);
+    inserir_no(f, 4);
+    inserir_no(f, 2);
+    inserir_no(f, 3);
+    inserir_no(f, 1);
+    inserir_no(f, 6);
+    inserir_no(f, 5);
+    inserir_no(f, 7);
 
-    remover_no(f, c, 60);
+    remover_no(f, 4);
 
-    imprimir_arvore(f, c);
+    imprimir_arvore(f);
 
     return 0;
 }

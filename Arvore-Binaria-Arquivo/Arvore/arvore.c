@@ -1,32 +1,28 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include "arvore.h"
 
-// Estrutura para no
-struct no{
+// Estrutura para cabecalho
+struct cabecalho{
+    int pos_raiz;
+    int pos_topo;
+    int pos_livre;
+};
+
+// Estrutura para nos da arvore
+struct no_arv{
     int info;
     int esq;
     int dir;
 };
 
-// Estrutura para cabecalho
-struct cabecalho{
-    int raiz;
-    int no_livre;
-};
-
-// Funcao para criar uma arvore binaria
-// Pre-condicao: nenhuma
-// Pos-condicao: retorna um arquivo binario inicializado
-FILE* criar_arvore()
+// Funcao para escrever no cabecalho
+// Pre-condicao: arquivo e cabecalho inicializados
+// Pos-condicao: escreve no cabecalho
+void escrever_cabecalho(FILE* f, Cabecalho* cab)
 {
-    FILE* f = fopen("arvore.bin", "w+b");
-
-    Cabecalho c;
-    c.raiz = -1;
-    c.no_livre = -1;
-    escrever_cabecalho(f, c);
-
-    return f;
+    fseek(f, 0, SEEK_SET);
+    fwrite(cab, sizeof(Cabecalho), 1, f);
 }
 
 // Funcao para ler cabecalho
@@ -34,232 +30,211 @@ FILE* criar_arvore()
 // Pos-condicao: retorna o cabecalho do arquivo
 Cabecalho* ler_cabecalho(FILE* f)
 {
-    Cabecalho *c = malloc(sizeof(Cabecalho));
-    fseek(f, 0, SEEK_SET);
-    fread(c, sizeof(Cabecalho), 1, f);
-    return c;
-}
+    Cabecalho* cab = (Cabecalho*) malloc(sizeof(Cabecalho));
+    if(!cab)
+        exit(1);
 
-// Funcao para escrever no cabecalho
-// Pre-condicao: arquivo e cabecalho inicializados
-// Pos-condicao: escreve no cabecalho
-void escrever_cabecalho(FILE* f, Cabecalho c)
-{
     fseek(f, 0, SEEK_SET);
-    fwrite(&c, sizeof(Cabecalho), 1, f);
-}
+    fread(cab, sizeof(Cabecalho), 1, f);
 
-// Funcao para ler no
-// Pre-condicao: arquivo inicializado
-// Pos-condicao: retorna arquivo lido em arquivo binario
-No ler_no(FILE* f, int dado)
-{
-    No no;
-    fseek(f, dado, SEEK_SET);
-    fread(&no, sizeof(No), 1, f);
-    return no;
+    return cab;
 }
 
 // Funcao para escrever no
 // Pre-condicao: arquivo inicializado
 // Pos-condicao: escreve no arquivo o no
-void escrever_no(FILE* f, No no, int dado)
+void escrever_no(FILE* f, No* no, int pos)
 {
-    fseek(f, dado, SEEK_SET);
-    fwrite(&no, sizeof(No), 1, f);
+    fseek(f, sizeof(Cabecalho)+pos*sizeof(No), SEEK_SET);
+    fwrite(no, sizeof(No), 1, f);
 }
 
-// Funcao auxiliar para inserir na arvore
-// Pre-condicao: arquivo e cabecalho inicializados
-// Pos-condicao: retorna sucesso em inserir
-int inserir(FILE* f, Cabecalho* c, int atual, int info)
+// Funcao para ler no
+// Pre-condicao: arquivo inicializado
+// Pos-condicao: retorna ponteiro para no
+No* ler_no(FILE* f, int pos)
 {
-    if(atual == -1){
-        int novo_dado = alocar_espaco(f, c);
-        No no;
-        no.info = info;
-        no.esq = -1;
-        no.dir = -1;
-        escrever_no(f, no, novo_dado);
-        return novo_dado;
-    }
+    No* no = (No*) malloc(sizeof(No));
+    if(!no)
+        exit(1);
 
-    No no_atual = ler_no(f, atual);
+    fseek(f, sizeof(Cabecalho)+pos*sizeof(No), SEEK_SET);
+    fread(no, sizeof(No), 1, f);
 
-    if(info < no_atual.info)
-        no_atual.esq = inserir(f, c, no_atual.esq, info);
-    else if(info > no_atual.info)
-        no_atual.dir = inserir(f, c, no_atual.dir, info);
-
-    escrever_no(f, no_atual, atual);
-    return atual;
+    return no;
 }
 
-// Funcao para inserir elemento da arvore
-// Pre-condicao: arquivo e cabecalho inicializados
+// Funcao para criar uma arvore binaria
+// Pre-condicao: nenhuma
+// Pos-condicao: retorna o cabecalho inicializado
+void criar_arvore(FILE* f)
+{
+    Cabecalho* cab = (Cabecalho*) malloc(sizeof(Cabecalho));
+
+    cab->pos_raiz = -1;
+    cab->pos_topo = 0;
+    cab->pos_livre = -1;
+
+    escrever_cabecalho(f, cab);
+    free(cab);
+}
+
+// Funcao para inserir na arvore
+// Pre-condicao: arquivo inicializado
 // Pos-condicao: nenhuma
-void inserir_no(FILE* f, Cabecalho* c, int info)
+void inserir_no(FILE* f, int info)
 {
-    c->raiz = inserir(f, c, c->raiz, info);
-    escrever_cabecalho(f, *c);
+    Cabecalho* cab = ler_cabecalho(f);
+    int pos;
+    No novo;
+
+    novo.info = info;
+    novo.esq = -1;
+    novo.dir = -1;
+
+    if(cab->pos_livre != -1){
+        pos = cab->pos_livre;
+        No* livre = ler_no(f, pos);
+        cab->pos_livre = livre->esq;
+        free(livre);
+    }
+    else
+        pos = cab->pos_topo++;
+
+    if(cab->pos_raiz == -1)
+        cab->pos_raiz = pos;
+
+    else{
+        int pai_pos = cab->pos_raiz;
+        No* pai = ler_no(f, pai_pos);
+
+        while(1){
+            if(info < pai->info){
+                if(pai->esq == -1){
+                    pai->esq = pos;
+                    escrever_no(f, pai, pai_pos);
+                    free(pai);
+                    break;
+                }
+                pai_pos = pai->esq;
+            }
+            else{
+                if(pai->dir == -1){
+                    pai->dir = pos;
+                    escrever_no(f, pai, pai_pos);
+                    free(pai);
+                    break;
+                }
+                pai_pos = pai->dir;
+            }
+            free(pai);
+            pai = ler_no(f, pai_pos);
+        }
+    }
+    escrever_no(f, &novo, pos);
+    escrever_cabecalho(f, cab);
+    free(cab);
+}
+
+// Funcao para remover elemento da arvore
+// Pre-condicao: cabecalho inicializado
+// Pos-condicao: nenhuma
+void remover_no(FILE* f, int info)
+{
+    Cabecalho* cab = ler_cabecalho(f);
+    cab->pos_raiz = remover(f, cab->pos_raiz, info, cab);
+    escrever_cabecalho(f, cab);
+    free(cab);
 }
 
 // Funcao auxiliar para remover elemento
 // Pre-condicao: arquivo e cabecalho inicializados
 // Pos-condicao: retorna o registro se removido ou -1 se nao encontrado
-int remover(FILE* f, Cabecalho* c, int atual, int info)
+int remover(FILE* f, int pos, int info, Cabecalho* cab)
 {
-    if(atual == -1)
+    if(pos == -1)
         return -1;
 
-    No no_atual = ler_no(f, atual);
+    No* no = ler_no(f, pos);
 
-    if(info < no_atual.info){
-        no_atual.esq = remover(f, c, no_atual.esq, info);
-        escrever_no(f, no_atual, atual);
-    }
-    else if(info > no_atual.info){
-        no_atual.dir = remover(f, c, no_atual.dir, info);
-        escrever_no(f, no_atual, atual);
-    }
+    if(info < no->info)
+        no->esq = remover(f, no->esq, info, cab);
+
+    else if(info > no->info)
+        no->dir = remover(f, no->dir, info, cab);
+
     else{
-        if(no_atual.esq == -1){
-            int temp = no_atual.dir;
-            espaco_livre_no(f, c, atual);
+        int temp;
+
+        if(no->esq == -1){
+            temp = no->dir;
+            no->dir = cab->pos_livre;
+            cab->pos_livre = pos;
+            escrever_no(f, no, pos);
+            free(no);
             return temp;
         }
-        else if(no_atual. dir == -1){
-            int temp = no_atual.esq;
-            espaco_livre_no(f, c, atual);
+        else if(no->dir == -1){
+            temp = no->esq;
+            no->esq = cab->pos_livre;
+            cab->pos_livre = pos;
+            escrever_no(f, no, pos);
+            free(no);
             return temp;
         }
         else{
-            int sucessor = procurar_no_maior(f, no_atual.esq);
-            No no_sucessor = ler_no(f, sucessor);
-
-            no_atual.info = no_sucessor.info;
-
-            no_atual.esq = remover(f, c, no_atual.esq, no_sucessor.info);
-            escrever_no(f, no_atual, atual);
+            int maior_pos = maximo(f, no->esq);
+            No* maior = ler_no(f, maior_pos);
+            no->info = maior->info;
+            no->esq = remover(f, no->esq, maior->info, cab);
+            escrever_no(f, no, pos);
+            free(maior);
         }
     }
-    return atual;
+    escrever_no(f, no, pos);
+    free(no);
+    return pos;
 }
 
-// Funcao para remover elemento da arvore
-// Pre-condicao: arquivo e cabecalho inicializados
-// Pos-condicao: nenhuma
-void remover_no(FILE* f, Cabecalho* c, int info)
+// Funcao para encontrar o maximo
+// Pre-condicao: nenhuma
+// Pos-condicao: retorna a posicao do maior valor da subarvore da esquerda
+int maximo(FILE* f, int pos)
 {
-    c->raiz = remover(f, c, c->raiz, info);
-    escrever_cabecalho(f, *c);
-}
-
-// Funcao para alocar espaco em arquivo binario
-// Pre-condicao: arquivo e cabecalho inicializados
-// Pos-condicao: retorna novo espaco inicializado
-int alocar_espaco(FILE* f, Cabecalho* c)
-{
-    int espaco_novo;
-
-    if(c->no_livre != -1){
-        espaco_novo = c->no_livre;
-        No no_livre = ler_no(f, espaco_novo);
-        c->no_livre = no_livre.esq;
-        escrever_cabecalho(f, *c);
+    No* no = ler_no(f, pos);
+    while(no->dir != -1){
+        pos = no->dir;
+        free(no);
+        no = ler_no(f, pos);
     }
-    else{
-        fseek(f, 0, SEEK_END);
-        espaco_novo = (int) ftell(f);
-    }
-
-    return espaco_novo;
-}
-
-// Funcao para escrever em novo espaco
-// Pre-condicao: arquivo e cabecalho inicializados
-// Pos-condicao: libera novo espaco em arquivo
-void espaco_livre_no(FILE* f, Cabecalho* c, int dado)
-{
-    No dado_livre;
-
-    dado_livre.info = -1;
-    dado_livre.esq = c->no_livre;
-    dado_livre.dir = -1;
-    escrever_no(f, dado_livre, dado);
-
-    c->no_livre = dado;
-    escrever_cabecalho(f, *c);
-}
-
-// Funcao para buscar o maior valor da subarvore esquerda
-// Pre-condicao: enviado o valor da esquerda
-// Pos-condicao: retorna a posicao do maior valor da subarvore esquerda
-int procurar_no_maior(FILE* f, int atual)
-{
-    if(atual == -1)
-        return -1;
-
-    No no_atual = ler_no(f, atual);
-
-    while(no_atual.dir != -1){
-        atual = no_atual.dir;
-        no_atual = ler_no(f, atual);
-    }
-
-    return atual;
+    free(no);
+    return pos;
 }
 
 // Funcao auxiliar para imprimir em preOrder
 // Pre-condicao: arquivo inicializado
 // Pos-condicao: imprime na tela a arvore pre ordenada
-void imprimir_preOrder(FILE* f, int atual)
+void imprimir_preOrder(FILE* f, int pos)
 {
-    if(atual != -1){
-        No no_atual = ler_no(f, atual);
-        printf("%d\n", no_atual.info);
+    if(pos == -1)
+        return;
 
-        imprimir_preOrder(f, no_atual.esq);
-        imprimir_preOrder(f, no_atual.dir);
-    }
+    No* no = ler_no(f, pos);
+
+    printf("%d\n", no->info);
+
+    imprimir_preOrder(f, no->esq);
+    imprimir_preOrder(f, no->dir);
+
+    free(no);
 }
 
-// Funcao para imprimir arvore
-// Pre-condicao: arquivo e cabecalho inicializados
-// Pos-condicao: nenhuma
-void imprimir_arvore(FILE* f, Cabecalho* c)
-{
-    imprimir_preOrder(f, c->raiz);
-}
-
-// Funcao auxiliar para buscar informacao
+// Funcao para imprimir em preOrder
 // Pre-condicao: arquivo inicializado
-// Pos-condicao: retorna o valor do registro da informacao
-int buscar_no(FILE* f, int atual, int info)
+// Pos-condicao: nenhuma
+void imprimir_arvore(FILE* f)
 {
-    if(atual == -1)
-        return -1;
-
-    No no_atual = ler_no(f, atual);
-
-    if(info == no_atual.info)
-        return atual;
-
-    else if(info < no_atual.info)
-        return buscar_no(f, no_atual.esq, info);
-
-    else
-        return buscar_no(f, no_atual.dir, info);
-
-    return -1;
+    Cabecalho* cab = ler_cabecalho(f);
+    imprimir_preOrder(f, cab->pos_raiz);
+    free(cab);
 }
-
-// Funcao para buscar informacao
-// Pre-condicao: arquivo e cabecalho inicializados
-// Pos-condicao: retorna o valor do registro da informacao
-int buscar_arvore(FILE* f, Cabecalho* c, int info)
-{
-    return buscar_no(f, c->raiz, info);
-}
-
-
