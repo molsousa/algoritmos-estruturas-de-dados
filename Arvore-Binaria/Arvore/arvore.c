@@ -1,260 +1,212 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "arvore.h"
+#include "fila.h"
 
 // Estrutura para arvore
-struct arvore{
-    Tipo info;
-    struct arvore* esq;
-    struct arvore* dir;
+struct no{
+    int info;
+    struct no* esq;
+    struct no* dir;
 };
 
-// Funcao para liberar arvore binaria
-static void liberar_no(No* raiz);
-// Funcao para contar a quantidade de elementos de uma arvore
-static int contar_elementos(No* raiz, int n);
-// Funcao para contar a quantidade de folhas de uma arvore
-static int contar_folha(No* raiz);
-// Funcao de busca binaria na arvore
-static int buscar(No* raiz, Tipo x);
-// Funcao para imprimir a arvore ordenada
-static void imprimir_ord(No* raiz);
-// Funcao para imprimir a arvore pre-ordenada
-static void imprimir_pre(No* raiz);
-// Funcao para imprimir a arvore pos-ordenada
-static void imprimir_pos(No* raiz);
-
-// Funcao para criar arvore binaria
-// Pre-condicao: ponteiro criado
-// Pos-condicao: retorna arvore vazia
-Arvore* criar_arvore()
+// Funcao para criar arvore vazia
+// Pre-condicao: nenhuma
+// Pos-condicao: retorna nulo para variavel Arvore
+Arvore criar_arvore()
 {
-    Arvore* novo;
-
-    novo = (Arvore*) malloc(sizeof(Arvore));
-    *novo = NULL;
-
-    return novo;
-}
-
-// Funcao para liberar arvore binaria
-// Pre-condicao: arvore criada
-// Pos-condicao: retorna nulo para ponteiro Arvore
-Arvore* liberar_arvore(Arvore* raiz)
-{
-    if(raiz == NULL)
-        return raiz;
-
-    liberar_no(*raiz);
-	
-	free(raiz);
-
     return NULL;
 }
 
-// Funcao para liberar arvore binaria
-static void liberar_no(No* raiz)
-{
-    if(raiz == NULL)
-        return;
-
-    liberar_no(raiz->esq);
-    liberar_no(raiz->dir);
-
-    free(raiz);
-}
-
-// Funcao para verificar condicao da arvore
+// Funcao para testar se uma arvore eh vazia
 // Pre-condicao: arvore criada
 // Pos-condicao: retorna 1 se vazia
-int arvore_vazia(Arvore* raiz)
+int vazia(Arvore raiz)
 {
-    return (*raiz == NULL);
+    return (raiz == NULL);
 }
 
-// Funcao para contar a quantidade de elementos de uma arvore
+// Funcao para inserir no na arvore
 // Pre-condicao: arvore criada
-// Pos-condicao: retorna a quantidade de elementos
-int quantidade_elementos(Arvore* raiz)
+// Pos-condicao: insere elemento na arvore
+Arvore inserir_no(Arvore raiz, int info)
 {
-    if(raiz == NULL || *raiz == NULL)
-        return 0;
-
-    return contar_elementos(*raiz, 0);
-}
-
-// Funcao para contar a quantidade de elementos de uma arvore
-static int contar_elementos(No* raiz, int n)
-{
-    if(raiz == NULL)
-        return n;
-
-    n = contar_elementos(raiz->esq, n+1);
-    n = contar_elementos(raiz->dir, n);
-
-    return n;
-}
-
-// Funcao para contar a quantidade de folhas de uma arvore
-// Pre-condicao: arvore criada
-// Pos-condicao: retorna a quantidade de folhas
-int quantidade_folha(Arvore* raiz)
-{
-    if(raiz == NULL || *raiz == NULL)
-        return 0;
-
-    return contar_folha(*raiz);
-}
-
-// Funcao para contar a quantidade de folhas de uma arvore
-static int contar_folha(No* raiz)
-{
-    if(raiz == NULL)
-        return 0;
-
-    if(!raiz->esq && !raiz->dir)
-        return 1;
-
-    return contar_folha(raiz->esq) + contar_folha(raiz->dir);
-}
-
-// Funcao para inserir elemento na arvore
-// Pre-condicao: arvore criada
-// Pos-condicao: nenhuma
-void inserir_no(Arvore* raiz, Tipo x)
-{
-    if((*raiz) == NULL){
-        No* novo = (No*) malloc(sizeof(No));
-        novo->info = x;
-        novo->esq = NULL;
-        novo->dir = NULL;
-        *raiz = novo;
+    if(vazia(raiz)){
+        raiz = malloc(sizeof(struct no));
+        raiz->info = info;
+        raiz->esq = raiz->dir = NULL;
+        return raiz;
     }
+    else if(raiz->info > info)
+        raiz->esq = inserir_no(raiz->esq, info);
+    else if(raiz->info < info)
+        raiz->dir = inserir_no(raiz->dir, info);
 
-    else if(x < (*raiz)->info)
-        inserir_no(&(*raiz)->esq, x);
-    else
-        inserir_no(&(*raiz)->dir, x);
+    return raiz;
 }
 
-// Funcao para remover elemento na arvore
+// Funcao para remover no na arvore
 // Pre-condicao: arvore criada
-// Pos-condicao: em caso de dois filhos, remocao in-order (menor subarvore direita)
-void remover_no(Arvore* raiz, Tipo x)
+// Pos-condicao: remove elemento da arvore
+Arvore remover_no(Arvore raiz, int info)
 {
-    if(*raiz == NULL)
-        return;
+    if(vazia(raiz))
+        return raiz;
 
-    if(x < (*raiz)->info)
-        remover_no(&(*raiz)->esq, x);
+    else if(raiz->info > info)
+        raiz->esq = remover_no(raiz->esq, info);
 
-    else if(x > (*raiz)->info)
-        remover_no(&(*raiz)->dir, x);
+    else if(raiz->info < info)
+        raiz->dir = remover_no(raiz->dir, info);
 
     else{
-        No* aux = *raiz;
+        Arvore aux = raiz;
+        if(!raiz->esq && !raiz->dir){
+            free(aux);
+            return NULL;
+        }
+        else if(!raiz->esq){
+            raiz = raiz->dir;
+            free(aux);
+        }
 
-        if((*raiz)->esq == NULL && (*raiz)->dir == NULL){
-            free(*raiz);
-            *raiz = NULL;
-        }
-        else if((*raiz)->esq == NULL){
-            *raiz = (*raiz)->dir;
+        else if(!raiz->dir){
+            raiz = raiz->esq;
             free(aux);
         }
-        else if((*raiz)->dir == NULL){
-            *raiz = (*raiz)->esq;
-            free(aux);
-        }
+
         else{
-            No* t = (*raiz)->dir;
+            aux = raiz->dir;
 
-            while(t->esq != NULL)
-                t = t->esq;
+            while(aux->esq != NULL)
+                aux = aux->esq;
 
-            (*raiz)->info = t->info;
-            remover_no(&(*raiz)->dir, t->info);
+            raiz->info = aux->info;
+            raiz->dir = remover_no(raiz->dir, aux->info);
         }
     }
+    return raiz;
 }
 
-// Funcao de busca binaria na arvore
+// Funcao que retorna o maior valor da arvore
 // Pre-condicao: arvore criada
-// Pos-condicao: retorna 1 se achou o elemento
-int busca_arvore(Arvore* raiz, Tipo x)
+// Pos-condicao: retorna o valor do no mais a direita
+int maximo(Arvore raiz)
 {
-    return buscar(*raiz, x);
+    if(vazia(raiz->dir))
+        return raiz->info;
+
+    return maximo(raiz->dir);
 }
 
-// Funcao de busca binaria na arvore
-static int buscar(No* raiz, Tipo x)
+// Funcao que retorna o menor valor da arvore
+// Pre-condicao: arvore criada
+// Pos-condicao: retorna o valor do no mais a esquerda
+int minimo(Arvore raiz)
 {
-    if(raiz == NULL)
+    if(vazia(raiz->esq))
+        return raiz->info;
+
+    return minimo(raiz->esq);
+}
+
+// Funcao para calcular altura de uma arvore binaria
+// Pre-condicao: arvore criada
+// Pos-condicao: retorna altura da arvore
+int altura(Arvore raiz)
+{
+    if(vazia(raiz))
         return 0;
 
-    if(raiz->info == x)
-        return 1;
+    else{
+        int esq = altura(raiz->esq);
+        int dir = altura(raiz->dir);
 
-    else if(raiz->info > x)
-        return buscar(raiz->esq, x);
+        if(esq > dir)
+            return (esq+1);
 
-    else
-        return buscar(raiz->dir, x);
+        else
+            return (dir+1);
+    }
+    return 0;
 }
 
-// Funcao para imprimir a arvore pre-ordenada
-// Pre-condicao: nenhuma
-// Pos-condicao: nenhuma
-void imprimir_arvore_pre(Arvore* raiz)
+// Funcao para imprimir arvore
+// Pre-condicao: arvore criada
+// Pos-condicao: imprime a arvore em ordem
+void inOrdem(Arvore raiz)
 {
-    imprimir_pre(*raiz);
+    if(vazia(raiz))
+        return;
+
+    inOrdem(raiz->esq);
+    printf("%d\n", raiz->info);
+    inOrdem(raiz->dir);
 }
 
-// Funcao para imprimir a arvore pre-ordenada
-static void imprimir_pre(No* raiz)
+// Funcao para imprimir arvore
+// Pre-condicao: arvore criada
+// Pos-condicao: imprime a arvore em pre ordem
+void preOrdem(Arvore raiz)
 {
-    if(raiz == NULL)
+    if(vazia(raiz))
         return;
 
     printf("%d\n", raiz->info);
-    imprimir_pre(raiz->esq);
-    imprimir_pre(raiz->dir);
+
+    preOrdem(raiz->esq);
+    preOrdem(raiz->dir);
 }
 
-// Funcao para imprimir a arvore ordenada
-// Pre-condicao: nenhuma
-// Pos-condicao: nenhuma
-void imprimir_arvore_ord(Arvore* raiz)
+// Funcao para imprimir arvore
+// Pre-condicao: arvore criada
+// Pos-condicao: imprime a arvore em pos ordem
+void posOrdem(Arvore raiz)
 {
-    imprimir_ord(*raiz);
-}
-
-// Funcao para imprimir a arvore ordenada
-static void imprimir_ord(No* raiz)
-{
-    if(raiz == NULL)
+    if(vazia(raiz))
         return;
 
-    imprimir_ord(raiz->esq);
+    posOrdem(raiz->esq);
+    posOrdem(raiz->dir);
+
     printf("%d\n", raiz->info);
-    imprimir_ord(raiz->dir);
 }
 
-// Funcao para imprimir a arvore pos-ordenada
-// Pre-condicao: nenhuma
-// Pos-condicao: nenhuma
-void imprimir_arvore_pos(Arvore* raiz)
+// Funcao para imprimir arvore
+// Pre-condicao: arvore criada
+// Pos-condicao: imprime por nivel os elementos da arvore
+void imprimir_por_niveis(Arvore raiz)
 {
-    imprimir_pos(*raiz);
-}
-
-// Funcao para imprimir a arvore pos-ordenada
-static void imprimir_pos(No* raiz)
-{
-    if(raiz == NULL)
+    if(vazia(raiz))
         return;
 
-    imprimir_pos(raiz->esq);
-    imprimir_pos(raiz->dir);
-    printf("%d\n", raiz->info);
+    Fila* f = criar_fila();
+    int i = 1;
+
+    enqueue(f, raiz);
+    enqueue(f, NULL);
+
+    printf("Nivel: %d -> ", i++);
+    while(!fila_vazia(f)){
+        struct no* atual = dequeue(f);
+
+        if(atual == NULL){
+            printf("\n");
+
+            if(!fila_vazia(f)){
+                printf("Nivel: %d -> ", i++);
+                enqueue(f, NULL);
+            }
+        }
+        else{
+            printf("%d ", atual->info);
+
+            if(atual->esq != NULL)
+                enqueue(f, atual->esq);
+
+            if(atual->dir != NULL)
+                enqueue(f, atual->dir);
+        }
+    }
+    liberar_fila(f);
 }

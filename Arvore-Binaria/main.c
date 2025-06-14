@@ -3,23 +3,21 @@
 
 int main()
 {
-    Arvore* raiz;
+    Arvore raiz = criar_arvore();
 
-    raiz = criar_arvore();
+    raiz = inserir_no(raiz, 50);
+    raiz = inserir_no(raiz, 40);
+    raiz = inserir_no(raiz, 45);
+    raiz = inserir_no(raiz, 30);
+    raiz = inserir_no(raiz, 20);
+    raiz = inserir_no(raiz, 35);
+    raiz = inserir_no(raiz, 60);
+    raiz = inserir_no(raiz, 55);
+    raiz = inserir_no(raiz, 70);
+    raiz = inserir_no(raiz, 65);
+    raiz = inserir_no(raiz, 75);
 
-    inserir_no(raiz, 4);
-    inserir_no(raiz, 2);
-    inserir_no(raiz, 1);
-    inserir_no(raiz, 3);
-    inserir_no(raiz, 6);
-    inserir_no(raiz, 5);
-    inserir_no(raiz, 7);
-
-    printf("Encontrado -> %d\n", busca_arvore(raiz, 7));
-
-    remover_no(raiz, 4);
-
-    imprimir_arvore_pre(raiz);
+    imprimir_por_niveis(raiz);
 
     return 0;
 }

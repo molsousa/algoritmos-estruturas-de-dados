@@ -1,66 +1,62 @@
-#ifndef ARVORE_H_
-#define ARVORE_H_
+#ifndef ARVORE_BINARIA_H_INCLUDED
+#define ARVORE_BINARIA_H_INCLUDED
 
 // Definicao de tipo para manipulacao de arvore
-typedef struct arvore No;
-// Definicao de tipo para arvore
-typedef struct arvore* Arvore;
-// Definicao de tipo para elemento (op)
-typedef int Tipo;
+typedef struct no* Arvore;
 
-// Funcao para criar arvore binaria
-// Pre-condicao: ponteiro criado
-// Pos-condicao: retorna arvore vazia
-Arvore* criar_arvore();
+// Funcao para criar arvore vazia
+// Pre-condicao: nenhuma
+// Pos-condicao: retorna nulo para variavel Arvore
+Arvore criar_arvore();
 
-// Funcao para liberar arvore binaria
-// Pre-condicao: arvore criada
-// Pos-condicao: retorna nulo para ponteiro Arvore
-Arvore* liberar_arvore(Arvore* raiz);
-
-// Funcao para verificar condicao da arvore
+// Funcao para testar se uma arvore eh vazia
 // Pre-condicao: arvore criada
 // Pos-condicao: retorna 1 se vazia
-int arvore_vazia(Arvore* raiz);
+int vazia(Arvore raiz);
 
-// Funcao para contar a quantidade de elementos de uma arvore
+// Funcao para inserir no na arvore
 // Pre-condicao: arvore criada
-// Pos-condicao: retorna a quantidade de elementos
-int quantidade_elementos(Arvore* raiz);
+// Pos-condicao: insere elemento na arvore
+Arvore inserir_no(Arvore raiz, int info);
 
-// Funcao para contar a quantidade de folhas de uma arvore
+// Funcao para remover no na arvore
 // Pre-condicao: arvore criada
-// Pos-condicao: retorna a quantidade de folhas
-int quantidade_folha(Arvore* raiz);
+// Pos-condicao: remove elemento da arvore
+Arvore remover_no(Arvore raiz, int info);
 
-// Funcao para inserir elemento na arvore
+// Funcao que retorna o maior valor da arvore
 // Pre-condicao: arvore criada
-// Pos-condicao: nenhuma
-void inserir_no(Arvore* raiz, Tipo x);
+// Pos-condicao: retorna o valor do no mais a direita
+int maximo(Arvore raiz);
 
-// Funcao para remover elemento na arvore
+// Funcao que retorna o menor valor da arvore
 // Pre-condicao: arvore criada
-// Pos-condicao: em caso de dois filhos, remocao in-order (menor subarvore direita)
-void remover_no(Arvore* raiz, Tipo x);
+// Pos-condicao: retorna o valor do no mais a esquerda
+int minimo(Arvore raiz);
 
-// Funcao de busca binaria na arvore
+// Funcao para calcular altura de uma arvore binaria
 // Pre-condicao: arvore criada
-// Pos-condicao: retorna 1 se achou o elemento
-int busca_arvore(Arvore* raiz, Tipo x);
+// Pos-condicao: retorna altura da arvore
+int altura(Arvore raiz);
 
-// Funcao para imprimir a arvore pre-ordenada
-// Pre-condicao: nenhuma
-// Pos-condicao: nenhuma
-void imprimir_arvore_pre(Arvore* raiz);
+// Funcao para imprimir arvore
+// Pre-condicao: arvore criada
+// Pos-condicao: imprime a arvore em ordem
+void inOrdem(Arvore raiz);
 
-// Funcao para imprimir a arvore ordenada
-// Pre-condicao: nenhuma
-// Pos-condicao: nenhuma
-void imprimir_arvore_ord(Arvore* raiz);
+// Funcao para imprimir arvore
+// Pre-condicao: arvore criada
+// Pos-condicao: imprime a arvore em pre ordem
+void preOrdem(Arvore raiz);
 
-// Funcao para imprimir a arvore pos-ordenada
-// Pre-condicao: nenhuma
-// Pos-condicao: nenhuma
-void imprimir_arvore_pos(Arvore* raiz);
+// Funcao para imprimir arvore
+// Pre-condicao: arvore criada
+// Pos-condicao: imprime a arvore em pos ordem
+void posOrdem(Arvore raiz);
 
-#endif // ARVORE_H_
+// Funcao para imprimir arvore
+// Pre-condicao: arvore criada
+// Pos-condicao: imprime por nivel os elementos da arvorevoid imprimir_por_niveis(Arvore raiz);
+void imprimir_por_niveis(Arvore raiz);
+
+#endif // ARVORE_BINARIA_H_INCLUDED
