@@ -151,31 +151,162 @@ void inserir_aux(ArvoreB raiz, int info)
     }
 }
 
+// Funcao para verificar se ha underflow
+// Pre-condicao: nenhuma
+// Pos-condicao: retorna 1 se underflow
+int underflow(ArvoreB no)
+{
+    return(no != NULL && no->num_chaves < MIN_CHAVES);
+}
+
+// Funcao para remover elemento
+// Pre-condicao: arvore criada
+// Pos-condicao: remove elemento da arvore
 ArvoreB remover(ArvoreB raiz, int info)
 {
     if(vazia(raiz))
         return raiz;
 
-    if(eh_folha(raiz)){
-        int i = 0;
-        while(i < raiz->num_chaves && raiz->chave[i] != info)
-            i++;
+    int pos;
+    int achou = busca_pos(raiz, info, &pos);
+    int i;
 
-        if(raiz->chave[i] != info)
-            return raiz;
+    if(achou){
+        if(eh_folha(raiz)){
+            for(i = pos; i < raiz->num_chaves - 1; i++)
+                raiz->chave[i] = raiz->chave[i + 1];
 
+            raiz->num_chaves--;
+        }
         else{
-            int j;
+            ArvoreB predecessor = raiz->filho[pos];
+            while(!eh_folha(predecessor))
+                predecessor = predecessor->filho[predecessor->num_chaves];
 
-            for(j = i; j < raiz->num_chaves-1; j++)
-                raiz->chave[j] = raiz->chave[j+1];
+            int chave_predecessor = predecessor->chave[predecessor->num_chaves - 1];
+            raiz->chave[pos] = chave_predecessor;
+            raiz->filho[pos] = remover(raiz->filho[pos], chave_predecessor);
+
+            if(underflow(raiz->filho[pos]))
+                raiz = tratar_underflow(raiz, pos);
+        }
+    }
+    else{
+        raiz->filho[pos] = remover(raiz->filho[pos], info);
+
+        if(underflow(raiz->filho[pos]))
+            raiz = tratar_underflow(raiz, pos);
+    }
+
+    if (raiz->num_chaves == 0) {
+        ArvoreB nova_raiz = raiz->filho[0];
+        free(raiz);
+        return nova_raiz;
+    }
+
+    return raiz;
+}
+
+// Funcao para tratamento de underflow
+// Pre-condicao: numero de chaves < ORDEM/2
+// Pos-condicao: corrige underflow caso preciso
+ArvoreB tratar_underflow(ArvoreB raiz, int pos)
+{
+    ArvoreB no_underflow = raiz->filho[pos];
+    int i;
+
+    if(pos > 0 && raiz->filho[pos - 1]->num_chaves > MIN_CHAVES){
+        ArvoreB irmao_esq = raiz->filho[pos - 1];
+
+        for(i = no_underflow->num_chaves; i > 0; i--)
+            no_underflow->chave[i] = no_underflow->chave[i - 1];
+
+        no_underflow->chave[0] = raiz->chave[pos - 1];
+        no_underflow->num_chaves++;
+
+        raiz->chave[pos - 1] = irmao_esq->chave[irmao_esq->num_chaves - 1];
+
+        if(!eh_folha(no_underflow)){
+            for(i = no_underflow->num_chaves; i > 0; i--)
+                no_underflow->filho[i] = no_underflow->filho[i - 1];
+
+            no_underflow->filho[0] = irmao_esq->filho[irmao_esq->num_chaves];
+        }
+
+        irmao_esq->num_chaves--;
+    }
+    else if(pos < raiz->num_chaves && raiz->filho[pos + 1]->num_chaves > MIN_CHAVES){
+        ArvoreB irmao_dir = raiz->filho[pos + 1];
+
+        no_underflow->chave[no_underflow->num_chaves] = raiz->chave[pos];
+        no_underflow->num_chaves++;
+
+        raiz->chave[pos] = irmao_dir->chave[0];
+
+        if(!eh_folha(no_underflow))
+            no_underflow->filho[no_underflow->num_chaves] = irmao_dir->filho[0];
+
+        for(i = 0; i < irmao_dir->num_chaves - 1; i++)
+            irmao_dir->chave[i] = irmao_dir->chave[i + 1];
+
+        if(!eh_folha(irmao_dir))
+            for(i = 0; i < irmao_dir->num_chaves; i++)
+                irmao_dir->filho[i] = irmao_dir->filho[i + 1];
+
+        irmao_dir->num_chaves--;
+    }
+    else{
+        if(pos > 0){
+            ArvoreB irmao_esq = raiz->filho[pos - 1];
+
+            irmao_esq->chave[irmao_esq->num_chaves] = raiz->chave[pos - 1];
+            irmao_esq->num_chaves++;
+
+            for(i = 0; i < no_underflow->num_chaves; i++)
+                irmao_esq->chave[irmao_esq->num_chaves+i] = no_underflow->chave[i];
+
+            if(!eh_folha(no_underflow))
+                for(i = 0; i <= no_underflow->num_chaves; i++)
+                    irmao_esq->filho[irmao_esq->num_chaves+i] = no_underflow->filho[i];
+
+            irmao_esq->num_chaves += no_underflow->num_chaves;
+
+            for(i = pos - 1; i < raiz->num_chaves - 1; i++)
+                raiz->chave[i] = raiz->chave[i+1];
+
+            for(i = pos; i < raiz->num_chaves; i++)
+                raiz->filho[i] = raiz->filho[i+1];
 
             raiz->num_chaves--;
 
-            if(raiz->num_chaves == 0)
-                return NULL;
+            free(no_underflow);
+        }
+        else{
+            ArvoreB irmao_dir = raiz->filho[pos+1];
+
+            no_underflow->chave[no_underflow->num_chaves] = raiz->chave[pos];
+            no_underflow->num_chaves++;
+
+            for(i = 0; i < irmao_dir->num_chaves; i++)
+                no_underflow->chave[no_underflow->num_chaves+i] = irmao_dir->chave[i];
+
+            if(!eh_folha(no_underflow))
+                for(i = 0; i <= irmao_dir->num_chaves; i++)
+                    no_underflow->filho[no_underflow->num_chaves+i] = irmao_dir->filho[i];
+
+            no_underflow->num_chaves += irmao_dir->num_chaves;
+
+            for(i = pos; i < raiz->num_chaves - 1; i++)
+                raiz->chave[i] = raiz->chave[i+1];
+
+            for(i = pos + 1; i < raiz->num_chaves; i++)
+                raiz->filho[i] = raiz->filho[i+1];
+
+            raiz->num_chaves--;
+            free(irmao_dir);
         }
     }
+
     return raiz;
 }
 

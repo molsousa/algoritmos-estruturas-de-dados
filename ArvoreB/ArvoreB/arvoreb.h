@@ -1,6 +1,7 @@
 #ifndef ARVORE_B_H_INCLUDED
 #define ARVORE_B_H_INCLUDED
 #define ORDEM 5
+#define MIN_CHAVES ((ORDEM - 1) / 2)
 
 // Definicao de itpo para arvore-B
 typedef struct no* ArvoreB;
@@ -50,7 +51,20 @@ ArvoreB inserir(ArvoreB raiz, int info);
 // Pos-condicao: utiliza as funcoes auxiliares para inserir determinado elemento
 void inserir_aux(ArvoreB raiz, int info);
 
+// Funcao para verificar se ha underflow
+// Pre-condicao: nenhuma
+// Pos-condicao: retorna 1 se underflow
+int underflow(ArvoreB no);
+
+// Funcao para remover elemento
+// Pre-condicao: arvore criada
+// Pos-condicao: remove elemento da arvore
 ArvoreB remover(ArvoreB raiz, int info);
+
+// Funcao para tratamento de underflow
+// Pre-condicao: numero de chaves < ORDEM/2
+// Pos-condicao: corrige underflow caso preciso
+ArvoreB tratar_underflow(ArvoreB raiz, int pos);
 
 // Funcao para imprimir em preOrdem
 // Pre-condicao: arvore criada
