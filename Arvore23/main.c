@@ -11,6 +11,9 @@ int main()
     raiz = inserir(raiz, 25);
     raiz = inserir(raiz, 30);
 
+    raiz = remover(raiz, 5);
+    raiz = remover(raiz, 25);
+
     imprimir_niveis(raiz);
 
     return 0;

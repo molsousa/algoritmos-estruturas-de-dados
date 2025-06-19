@@ -189,6 +189,261 @@ Arvore23 inserir(Arvore23 raiz, int chave)
     }
 }
 
+// Funcao para encontrar sucessor
+// Pre-condicao: nenhuma
+// Pos-condicao: encontra menor valor da subarvore da direita
+Arvore23 encontrar_sucessor(Arvore23 raiz, int* sucessor)
+{
+    if(eh_folha(raiz)){
+        *sucessor = raiz->chave_esq;
+        raiz->chave_esq = (raiz->num_chaves == 2) ? raiz->chave_dir : 0;
+        raiz->num_chaves--;
+        return raiz;
+    }
+
+    raiz->esq = encontrar_sucessor(raiz->esq, sucessor);
+
+    if(raiz->esq->num_chaves == 0)
+        restaurar_subarvore(raiz, 0);
+
+    return raiz;
+}
+
+// Funcao para corrigir underflow
+// Pre-condicao: nenhuma
+// Pos-condicao: corrige underflow distribuindo a esquerda, direita ou fundindo filhos
+void restaurar_subarvore(Arvore23 pai, int pos_filho)
+{
+    if(pos_filho == 0){
+        Arvore23 x = pai->meio;
+
+        if(x->num_chaves == 2)
+            redistribuir_esquerda(pai, 1);
+
+        else
+            merge(pai, 0);
+    }
+    else if(pos_filho == 1){
+        Arvore23 irmao_esq = pai->esq;
+
+        if(irmao_esq->num_chaves == 2)
+            redistribuir_direita(pai, 0);
+
+        else if(pai->num_chaves == 2){
+            Arvore23 irmao_dir = pai->dir;
+
+            if(irmao_dir->num_chaves == 2)
+                redistribuir_esquerda(pai, 2);
+            else
+                merge(pai, 1);
+        }
+        else
+            merge(pai, 0);
+    }
+    else{
+        Arvore23 x = pai->meio;
+        if(x->num_chaves == 2)
+            redistribuir_direita(pai, 1);
+        else
+            merge(pai, 1);
+    }
+}
+
+// Funcao para distribuir a esquerda
+// Pre-condicao: nenhuma
+// Pos-condicao: reajusta chaves sem alterar a altura da arvore
+void redistribuir_esquerda(Arvore23 pai, int pos_filho)
+{
+    Arvore23 x;
+    Arvore23 y;
+
+    if(pos_filho == 1){
+        x = pai->meio;
+        y = pai->esq;
+
+        y->chave_esq = pai->chave_esq;
+        y->num_chaves = 1;
+        pai->chave_esq = x->chave_esq;
+    }
+    else{
+        x = pai->dir;
+        y = pai->meio;
+
+        y->chave_dir = pai->chave_dir;
+        y->num_chaves = 2;
+        pai->chave_dir = x->chave_esq;
+    }
+
+    if(!eh_folha(x)){
+        if(pos_filho == 1)
+            y->meio = x->esq;
+        else
+            y->dir = x->esq;
+    }
+
+    x->chave_esq = x->chave_dir;
+    x->num_chaves = 1;
+    x->esq = x->meio;
+    x->meio = x->dir;
+    x->dir = NULL;
+}
+
+// Funcao para distribuir a direita
+// Pre-condicao: nenhuma
+// Pos-condicao: reajusta chaves sem alterar a altura da arvore
+void redistribuir_direita(Arvore23 pai, int pos_filho)
+{
+    Arvore23 x = pai->esq;
+    Arvore23 y = pai->meio;
+
+    y->chave_dir = y->chave_esq;
+    y->chave_esq = pai->chave_esq;
+    y->num_chaves = 2;
+
+    if(!eh_folha(x)){
+        y->dir = y->meio;
+        y->meio = y->esq;
+        y->esq = x->dir;
+    }
+
+    pai->chave_esq = x->chave_dir;
+    x->num_chaves = 1;
+    x->dir = NULL;
+}
+
+// Funcao para fundir irmaos
+// Pre-condicao: nenhuma
+// Pos-condicao: funde um filho da esquerda com o irmao da direita
+void merge(Arvore23 pai, int pos_filho)
+{
+    Arvore23 x;
+    Arvore23 y;
+
+    if(pos_filho == 0){
+        x = pai->esq;
+        y = pai->meio;
+
+        x->chave_dir = pai->chave_esq;
+        x->chave_esq = (x->num_chaves == 1) ? x->chave_esq : y->chave_esq;
+        x->num_chaves = 2;
+
+        x->meio = (x->esq != NULL) ? x->meio : y->esq;
+        x->dir = y->meio;
+
+        pai->chave_esq = pai->chave_dir;
+        pai->meio = pai->dir;
+        pai->dir = NULL;
+        pai->num_chaves--;
+
+        free(y);
+    }
+    else{
+        x = pai->meio;
+        y = pai->dir;
+
+        x->chave_dir = pai->chave_dir;
+        x->num_chaves = 2;
+
+        x->dir = y->esq;
+
+        pai->dir = NULL;
+        pai->num_chaves--;
+        free(y);
+    }
+}
+
+// Funcao recursiva para remover elemento
+// Pre-condicao: nenhuma
+// Pos-condicao: remove elemento
+Arvore23 remover_recursivo(Arvore23 raiz, int chave, int *fim)
+{
+    if(vazia(raiz)){
+        *fim = 1;
+        return NULL;
+    }
+
+    int pos_filho;
+
+    if(eh_folha(raiz)){
+        if(raiz->num_chaves == 2){
+            if(raiz->chave_esq == chave){
+                raiz->chave_esq = raiz->chave_dir;
+                raiz->num_chaves = 1;
+                *fim = 1;
+            }
+            else if(raiz->chave_dir == chave){
+                raiz->num_chaves = 1;
+                *fim = 1;
+            }
+            else
+                *fim = 1;
+        }
+        else{
+            if(raiz->chave_esq == chave){
+                raiz->num_chaves = 0;
+                *fim = 0;
+            }
+            else
+                *fim = 1;
+        }
+        return raiz;
+    }
+    if(chave < raiz->chave_esq){
+        pos_filho = 0;
+        raiz->esq = remover_recursivo(raiz->esq, chave, fim);
+    }
+    else if(raiz->num_chaves == 1 || chave < raiz->chave_dir){
+        if(chave == raiz->chave_esq){
+            int sucessor;
+            raiz->meio = encontrar_sucessor(raiz->meio, &sucessor);
+            raiz->chave_esq = sucessor;
+            pos_filho = 1;
+        }
+        else if(raiz->num_chaves == 2 && chave == raiz->chave_dir){
+            int sucessor;
+            raiz->dir = encontrar_sucessor(raiz->dir, &sucessor);
+            raiz->chave_dir = sucessor;
+            pos_filho = 2;
+        }
+        else{
+            pos_filho = 1;
+            raiz->meio = remover_recursivo(raiz->meio, chave, fim);
+        }
+    }
+    else{
+        pos_filho = 2;
+        raiz->dir = remover_recursivo(raiz->dir, chave, fim);
+    }
+    if(!(*fim)){
+        restaurar_subarvore(raiz, pos_filho);
+        if(raiz->num_chaves > 0)
+            *fim = 1;
+    }
+
+    return raiz;
+}
+
+// Funcao para remover elemento
+// Pre-condicao: arvore criada
+// Pos-condicao: remove elemento
+Arvore23 remover(Arvore23 raiz, int chave)
+{
+    if(vazia(raiz))
+        return raiz;
+
+    int fim = 0;
+
+    raiz = remover_recursivo(raiz, chave, &fim);
+
+    if(raiz != NULL && raiz->num_chaves == 0){
+        Arvore23 temp = raiz;
+        raiz = raiz->esq;
+        free(temp);
+    }
+
+    return raiz;
+}
+
 // Funcao para imprimir arvore23
 // Pre-condicao: nenhuma
 // Pos-condicao: imprime arvore ordenada na tela
