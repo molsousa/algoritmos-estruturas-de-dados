@@ -9,3 +9,5 @@
   - Todo nó vermelho possui dois filhos pretos ou nulo.
  
 - Essa implementação reduz as possíveis violações e mantendo a complexidade das operações de rotação.
+
+- Funções de inserção, remoção, busca e impressão
