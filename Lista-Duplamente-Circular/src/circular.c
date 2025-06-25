@@ -60,25 +60,19 @@ void inserir_elemento(Lista* l, int info)
         novo->prox = novo;
         *l = novo;
     }
+
     else{
-        if((*l)->prox == *l){
-            novo->prox = *l;
-            novo->ant = *l;
-            (*l)->prox = novo;
-            (*l)->ant = novo;
-        }
-        else{
-            Elem* aux = (*l)->prox;
+        Elem* aux = (*l)->prox;
 
-            while(aux->prox != *l)
-                aux = aux->prox;
+        while(aux->prox != *l)
+            aux = aux->prox;
 
-            aux->prox = novo;
-            novo->ant = aux;
-            novo->prox = *l;
-            (*l)->ant = novo;
-        }
+        aux->prox = novo;
+        novo->ant = aux;
+        novo->prox = *l;
+        (*l)->ant = novo;
     }
+
 }
 
 // Funcao para remover elemento da lista
