@@ -82,44 +82,44 @@ void troca_cor(FILE* f, int pos)
 
 int rotacionar_esquerda(FILE* f, int pos)
 {
-    no* x = ler_no(f, pos);
-    int pos_dir = x->dir;
-    no* no_dir = ler_no(f, pos_dir);
+    no* h = ler_no(f, pos);
+    int pos_x = h->dir;
+    no* x = ler_no(f, pos_x);
 
-    x->esq = no_dir->dir;
-    no_dir->dir = pos;
+    h->dir = x->esq;
+    x->esq = pos;
 
-    no_dir->cor = x->cor;
-    x->cor = VERMELHO;
+    x->cor = h->cor;
+    h->cor = VERMELHO;
 
-    escrever_no(f, no_dir, pos);
-    escrever_no(f, x, pos_dir);
+    escrever_no(f, h, pos);
+    escrever_no(f, x, pos_x);
 
+    free(h);
     free(x);
-    free(no_dir);
 
-    return pos_dir;
+    return pos_x;
 }
 
 int rotacionar_direita(FILE* f, int pos)
 {
-    no* x = ler_no(f, pos);
-    int pos_esq = x->esq;
-    no* no_esq = ler_no(f, pos_esq);
+    no* h = ler_no(f, pos);
+    int pos_x = h->esq;
+    no* x = ler_no(f, pos_x);
 
-    x->dir = no_esq->esq;
-    no_esq->esq = pos;
+    h->esq = x->dir;
+    x->dir = pos;
 
-    no_esq->cor = x->cor;
-    x->cor = VERMELHO;
+    x->cor = h->cor;
+    h->cor = VERMELHO;
 
-    escrever_no(f, no_esq, pos);
-    escrever_no(f, x, pos_esq);
+    escrever_no(f, h, pos);
+    escrever_no(f, x, pos_x);
 
+    free(h);
     free(x);
-    free(no_esq);
 
-    return pos_esq;
+    return pos_x;
 }
 
 void inserir(FILE* f, int chave)
@@ -128,7 +128,7 @@ void inserir(FILE* f, int chave)
     cab->pos_raiz = inserir_aux(f, cab, chave, cab->pos_raiz);
 
     no* x = ler_no(f, cab->pos_raiz);
-    if(cor(f, cab->pos_raiz) != PRETO){
+    if(x->cor != PRETO){
         x->cor = PRETO;
         escrever_no(f, x, cab->pos_raiz);
     }
@@ -153,30 +153,36 @@ int inserir_aux(FILE* f, cabecalho* cab, int chave, int pos)
     }
     no* aux = ler_no(f, pos);
 
-    if(aux->chave > chave){
+    if(aux->chave > chave)
         aux->esq = inserir_aux(f, cab, chave, aux->esq);
-        escrever_no(f, aux, pos);
-    }
 
-    else if(aux->chave < chave){
+    else if(aux->chave < chave)
         aux->dir = inserir_aux(f, cab, chave, aux->dir);
-        escrever_no(f, aux, pos);
+
+    else{
+        free(aux);
+        return pos;
     }
 
-    if(cor(f, aux->dir) == VERMELHO && cor(f, aux->esq) == PRETO)
-        rotacionar_esquerda(f, pos);
+    escrever_no(f, aux, pos);
 
-    if(cor(f, aux->esq) == VERMELHO){
-        no* aux_esq = ler_no(f, aux->esq);
-        if(cor(f, aux_esq->esq) == VERMELHO)
-            rotacionar_direita(f, pos);
-        free(aux_esq);
+    if(cor(f, aux->dir) == VERMELHO && cor(f, aux->esq) == PRETO){
+        pos = rotacionar_esquerda(f, pos);
+        free(aux);
+        aux = ler_no(f, pos);
+    }
+
+    if(cor(f, aux->esq) == VERMELHO && cor(f, ler_no(f, aux->esq)->esq) == VERMELHO){
+        pos = rotacionar_direita(f, pos);
+        free(aux);
+        aux = ler_no(f, pos);
     }
 
     if(cor(f, aux->esq) == VERMELHO && cor(f, aux->dir) == VERMELHO)
         troca_cor(f, pos);
 
     free(aux);
+
     return pos;
 }
 

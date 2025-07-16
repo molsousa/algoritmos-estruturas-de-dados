@@ -6,12 +6,13 @@ int main()
 
     raiz = criar_arvore();
 
-    inserir_no(raiz, 50);
-    inserir_no(raiz, 60);
-    inserir_no(raiz, 65);
-    inserir_no(raiz, 10);
-    inserir_no(raiz, 20);
-    inserir_no(raiz, 15);
+    inserir_no(raiz, 5);
+    inserir_no(raiz, 3);
+    inserir_no(raiz, 4);
+    inserir_no(raiz, 2);
+    inserir_no(raiz, 8);
+    inserir_no(raiz, 7);
+    inserir_no(raiz, 6);
 
     imprimir_arvore(raiz);
 
