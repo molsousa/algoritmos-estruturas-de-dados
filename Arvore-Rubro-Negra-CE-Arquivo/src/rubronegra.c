@@ -5,11 +5,11 @@
 
 void criar_arvore(FILE* f)
 {
+    system("color C");
     cabecalho* cab = malloc(sizeof(cabecalho));
 
     cab->pos_raiz = -1;
     cab->pos_topo = 0;
-    cab->pos_livre = -1;
 
     escrever_cabecalho(f, cab);
     free(cab);
@@ -187,6 +187,190 @@ void inserir(FILE* f, int chave)
     free(cab);
 }
 
+int busca_aux(FILE* f, int chave, int pos)
+{
+    if(pos == -1)
+        return pos;
+
+    no* h = ler_no(f, pos);
+
+    if(h->chave > chave){
+        int ptr_esq = h->esq;
+        free(h);
+        return busca_aux(f, chave, ptr_esq);
+    }
+
+    else if(h->chave < chave){
+        int ptr_dir = h->dir;
+        free(h);
+        return busca_aux(f, chave, ptr_dir);
+    }
+
+    else{
+        free(h);
+        return pos;
+    }
+}
+
+int busca(FILE* f, int chave)
+{
+    cabecalho* cab = ler_cabecalho(f);
+
+    int res = busca_aux(f, chave, cab->pos_raiz);
+    free(cab);
+
+    return res;
+}
+
+int mover_para_esquerda(FILE* f, int pos)
+{
+    troca_cor(f, pos);
+
+    if(cor(f, (ler_no(f, ler_no(f, pos)->dir)->esq)) == VERMELHO){
+        no* h = ler_no(f, pos);
+        h->dir = rotacionar_direita(f, h->dir);
+
+        escrever_no(f, h, pos);
+
+        pos = rotacionar_esquerda(f, pos);
+        free(h);
+        troca_cor(f, pos);
+    }
+
+    return pos;
+}
+
+int mover_para_direita(FILE* f, int pos)
+{
+    troca_cor(f, pos);
+
+    if(cor(f, ler_no(f, ler_no(f, pos)->esq)->esq) == VERMELHO){
+        pos = rotacionar_direita(f, pos);
+        troca_cor(f, pos);
+    }
+
+    return pos;
+}
+
+int balancear(FILE* f, int pos)
+{
+    if(cor(f, ler_no(f, pos)->dir) == VERMELHO)
+        pos = rotacionar_esquerda(f, pos);
+
+    no* h = ler_no(f, pos);
+
+    if(h->esq != -1 && cor(f, h->esq) == VERMELHO && cor(f, ler_no(f, h->esq)->esq) == VERMELHO)
+        pos = rotacionar_direita(f, pos);
+
+    free(h);
+
+    if(cor(f, ler_no(f, pos)->esq) == VERMELHO && cor(f, ler_no(f, pos)->dir) == VERMELHO)
+        troca_cor(f, pos);
+
+    return pos;
+}
+
+int remover_no_menor(FILE* f, cabecalho* cab, int pos)
+{
+    if(ler_no(f, pos)->esq == -1)
+        return -1;
+
+    if(cor(f, ler_no(f, pos)->esq) == PRETO && cor(f, ler_no(f, ler_no(f, pos)->esq)->esq) == PRETO)
+        pos = mover_para_esquerda(f, pos);
+
+    no* h = ler_no(f, pos);
+    h->esq = remover_no_menor(f, cab, h->esq);
+
+    escrever_no(f, h, pos);
+
+    free(h);
+
+    return balancear(f, pos);
+}
+
+int procurar_menor(FILE* f, int pos)
+{
+    no* t = ler_no(f, pos);
+    int pos_menor = pos;
+
+    while(t->esq != -1){
+        pos_menor = t->esq;
+        free(t);
+        ler_no(f, pos_menor);
+    }
+    free(t);
+
+    return pos_menor;
+}
+
+int remover_aux(FILE* f, cabecalho* cab, int chave, int pos)
+{
+    no* h = ler_no(f, pos);
+
+    if(chave < h->chave){
+        if(cor(f, h->esq) == PRETO && cor(f, ler_no(f, h->esq)->esq) == PRETO)
+            pos = mover_para_esquerda(f, pos);
+
+        free(h);
+        h = ler_no(f, pos);
+
+        h->esq = remover_aux(f, cab, chave, h->esq);
+    }
+
+    else{
+        if(cor(f, h->esq) == VERMELHO)
+            pos = rotacionar_direita(f, pos);
+
+        free(h);
+        h = ler_no(f, pos);
+
+        if(chave == h->chave && h->dir == -1){
+            free(h);
+            return -1;
+        }
+
+        if(cor(f, h->dir) == PRETO && cor(f, ler_no(f, h->dir)->esq) == PRETO){
+            pos = mover_para_direita(f, pos);
+            free(h);
+            h = ler_no(f, pos);
+        }
+
+        if(chave == h->chave){
+            no* aux = ler_no(f, procurar_menor(f, h->dir));
+
+            h->chave = aux->chave;
+            free(aux);
+            h->dir = remover_no_menor(f, cab, h->dir);
+        }
+        else
+            h->dir = remover_aux(f, cab, chave, h->dir);
+    }
+    escrever_no(f, h, pos);
+    free(h);
+
+    return balancear(f, pos);
+}
+
+void remover(FILE* f, int chave)
+{
+    if(busca(f, chave) == -1)
+        return;
+
+    cabecalho* cab = ler_cabecalho(f);
+
+    cab->pos_raiz = remover_aux(f, cab, chave, cab->pos_raiz);
+
+    if(cab->pos_raiz != -1){
+        no* h = ler_no(f, cab->pos_raiz);
+        h->cor = PRETO;
+        escrever_no(f, h, cab->pos_raiz);
+    }
+
+    escrever_cabecalho(f, cab);
+
+    free(cab);
+}
+
 void imprimir_aux(FILE* f, int pos)
 {
     if(pos == -1)
@@ -221,8 +405,10 @@ void imprimir_niveis(FILE* f)
 {
     cabecalho* cab = ler_cabecalho(f);
 
-    if(cab->pos_raiz == -1)
+    if(cab->pos_raiz == -1){
+        free(cab);
         return;
+    }
 
     no* x = ler_no(f, cab->pos_raiz);
     no* aux[1000];
@@ -268,4 +454,27 @@ void imprimir_niveis(FILE* f)
 
     fila = liberar_fila(fila);
     free(cab);
+}
+
+int contar_nos(FILE* f)
+{
+    cabecalho* cab = ler_cabecalho(f);
+
+    int res = contar_nos_aux(f, cab->pos_raiz);
+    free(cab);
+
+    return res;
+}
+
+int contar_nos_aux(FILE* f, int pos)
+{
+    if(pos == -1)
+        return 0;
+
+    no* aux = ler_no(f, pos);
+    int pos_esq = aux->esq;
+    int pos_dir = aux->dir;
+    free(aux);
+
+    return 1 + contar_nos_aux(f, pos_esq) + contar_nos_aux(f, pos_dir);
 }

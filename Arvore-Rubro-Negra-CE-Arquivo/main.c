@@ -7,9 +7,9 @@ int main()
 
     criar_arvore(f);
 
+    inserir(f, 3);
     inserir(f, 2);
     inserir(f, 32);
-    inserir(f, 3);
     inserir(f, 6);
     inserir(f, 8);
     inserir(f, 27);
@@ -26,6 +26,21 @@ int main()
     inserir(f, 17);
     inserir(f, 1);
     inserir(f, 11);
+
+    remover(f, 21);
+    remover(f, 32);
+    remover(f, 26);
+    remover(f, 1);
+    remover(f, 18);
+    remover(f, 24);
+    /*
+    remover(f, 6);
+    remover(f, 7);
+    remover(f, 17);
+    remover(f, 11);
+    remover(f, 8);
+    remover(f, 4);
+    */
 
     imprimir_niveis(f);
 
