@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "../include/rubronegra.h"
+#include "../include/fila.h"
 
 void criar_arvore(FILE* f)
 {
@@ -58,28 +59,6 @@ int cor(FILE* f, int pos)
     return res;
 }
 
-void troca_cor(FILE* f, int pos)
-{
-    no* x = ler_no(f, pos);
-    x->cor = !x->cor;
-
-    if(x->esq != -1){
-        no* filho_esq = ler_no(f, x->esq);
-        filho_esq->cor = !filho_esq->cor;
-        escrever_no(f, filho_esq, x->esq);
-        free(filho_esq);
-    }
-
-    if(x->dir != -1){
-        no* filho_dir = ler_no(f, x->dir);
-        filho_dir->cor = !filho_dir->cor;
-        escrever_no(f, filho_dir, x->dir);
-        free(filho_dir);
-    }
-    escrever_no(f, x, pos);
-    free(x);
-}
-
 int rotacionar_esquerda(FILE* f, int pos)
 {
     no* h = ler_no(f, pos);
@@ -122,21 +101,26 @@ int rotacionar_direita(FILE* f, int pos)
     return pos_x;
 }
 
-void inserir(FILE* f, int chave)
+void troca_cor(FILE* f, int pos)
 {
-    cabecalho* cab = ler_cabecalho(f);
-    cab->pos_raiz = inserir_aux(f, cab, chave, cab->pos_raiz);
+    no* x = ler_no(f, pos);
+    x->cor = !x->cor;
 
-    no* x = ler_no(f, cab->pos_raiz);
-    if(x->cor != PRETO){
-        x->cor = PRETO;
-        escrever_no(f, x, cab->pos_raiz);
+    if(x->esq != -1){
+        no* filho_esq = ler_no(f, x->esq);
+        filho_esq->cor = !filho_esq->cor;
+        escrever_no(f, filho_esq, x->esq);
+        free(filho_esq);
     }
 
-    escrever_cabecalho(f, cab);
-
+    if(x->dir != -1){
+        no* filho_dir = ler_no(f, x->dir);
+        filho_dir->cor = !filho_dir->cor;
+        escrever_no(f, filho_dir, x->dir);
+        free(filho_dir);
+    }
+    escrever_no(f, x, pos);
     free(x);
-    free(cab);
 }
 
 int inserir_aux(FILE* f, cabecalho* cab, int chave, int pos)
@@ -186,13 +170,20 @@ int inserir_aux(FILE* f, cabecalho* cab, int chave, int pos)
     return pos;
 }
 
-void imprimir(FILE* f)
+void inserir(FILE* f, int chave)
 {
     cabecalho* cab = ler_cabecalho(f);
-    int pos = cab->pos_raiz;
+    cab->pos_raiz = inserir_aux(f, cab, chave, cab->pos_raiz);
 
-    imprimir_aux(f, pos);
+    no* x = ler_no(f, cab->pos_raiz);
+    if(x->cor != PRETO){
+        x->cor = PRETO;
+        escrever_no(f, x, cab->pos_raiz);
+    }
 
+    escrever_cabecalho(f, cab);
+
+    free(x);
     free(cab);
 }
 
@@ -204,7 +195,6 @@ void imprimir_aux(FILE* f, int pos)
     no* aux = ler_no(f, pos);
 
     printf("%d - ", aux->chave);
-
     if(aux->cor == VERMELHO)
         printf("VERMELHO\n");
 
@@ -215,4 +205,67 @@ void imprimir_aux(FILE* f, int pos)
     imprimir_aux(f, aux->dir);
 
     free(aux);
+}
+
+void imprimir(FILE* f)
+{
+    cabecalho* cab = ler_cabecalho(f);
+    int pos = cab->pos_raiz;
+
+    imprimir_aux(f, pos);
+
+    free(cab);
+}
+
+void imprimir_niveis(FILE* f)
+{
+    cabecalho* cab = ler_cabecalho(f);
+
+    if(cab->pos_raiz == -1)
+        return;
+
+    no* x = ler_no(f, cab->pos_raiz);
+    no* aux[1000];
+    int i = 0;
+
+    Fila fila = criar_fila();
+    enqueue(fila, x);
+    enqueue(fila, NULL);
+    aux[i++] = x;
+    printf("< ");
+
+    while(!fila_vazia(fila)){
+        no* atual = dequeue(fila);
+
+        if(atual == NULL){
+            printf(" >\n");
+
+            if(!fila_vazia(fila)){
+                printf("< ");
+                enqueue(fila, NULL);
+            }
+        }
+        else{
+            printf("%d", atual->chave);
+
+            if(atual->esq != -1){
+                x = ler_no(f, atual->esq);
+                enqueue(fila, x);
+                aux[i++] = x;
+            }
+            if(atual->dir != -1){
+                x = ler_no(f, atual->dir);
+                enqueue(fila, x);
+                aux[i++] = x;
+            }
+            if(!consultar_nulo(fila))
+                printf(" ");
+        }
+    }
+    i--;
+    while(i >= 0)
+        free(aux[i--]);
+
+    fila = liberar_fila(fila);
+    free(cab);
 }

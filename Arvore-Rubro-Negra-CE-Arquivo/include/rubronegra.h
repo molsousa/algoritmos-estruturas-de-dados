@@ -27,18 +27,20 @@ void escrever_no(FILE* f, no* x, int pos);
 
 int cor(FILE* f, int pos);
 
-void troca_cor(FILE* f, int pos);
-
 int rotacionar_esquerda(FILE* f, int pos);
 
 int rotacionar_direita(FILE* f, int pos);
 
-void inserir(FILE* f, int chave);
+void troca_cor(FILE* f, int pos);
 
 int inserir_aux(FILE* f, cabecalho* cab, int chave, int pos);
 
-void imprimir(FILE* f);
+void inserir(FILE* f, int chave);
 
 void imprimir_aux(FILE* f, int pos);
+
+void imprimir(FILE* f);
+
+void imprimir_niveis(FILE* f);
 
 #endif
