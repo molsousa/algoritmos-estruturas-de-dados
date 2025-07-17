@@ -3,6 +3,9 @@
 #include "../include/rubronegra.h"
 #include "../include/fila.h"
 
+// Funcao para criar uma arvore rubro negra
+// Pre-condicao: nenhuma
+// Pos-condicao: retorna o cabecalho inicializado
 void criar_arvore(FILE* f)
 {
     system("color C");
@@ -15,6 +18,9 @@ void criar_arvore(FILE* f)
     free(cab);
 }
 
+// Funcao para ler cabecalho
+// Pre-condicao: arquivo inicializado
+// Pos-condicao: retorna o cabecalho do arquivo
 cabecalho* ler_cabecalho(FILE* f)
 {
     cabecalho* cab = malloc(sizeof(cabecalho));
@@ -25,12 +31,18 @@ cabecalho* ler_cabecalho(FILE* f)
     return cab;
 }
 
+// Funcao para escrever no cabecalho
+// Pre-condicao: arquivo e cabecalho inicializados
+// Pos-condicao: escreve no cabecalho
 void escrever_cabecalho(FILE* f, cabecalho* cab)
 {
     fseek(f, 0, SEEK_SET);
     fwrite(cab, sizeof(cabecalho), 1, f);
 }
 
+// Funcao para ler no
+// Pre-condicao: arquivo inicializado
+// Pos-condicao: retorna ponteiro para no
 no* ler_no(FILE* f, int pos)
 {
     no* x = malloc(sizeof(no));
@@ -41,12 +53,18 @@ no* ler_no(FILE* f, int pos)
     return x;
 }
 
+// Funcao para escrever no
+// Pre-condicao: arquivo inicializado
+// Pos-condicao: escreve no arquivo o no
 void escrever_no(FILE* f, no* x, int pos)
 {
     fseek(f, sizeof(cabecalho) + sizeof(no)*pos, SEEK_SET);
     fwrite(x, sizeof(no), 1, f);
 }
 
+// Funcao para retornar cor do no
+// Pre-condicao: nenhuma
+// Pos-condicao: retorna cor do no ou PRETO se for -1
 int cor(FILE* f, int pos)
 {
     if(pos == -1)
@@ -59,6 +77,9 @@ int cor(FILE* f, int pos)
     return res;
 }
 
+// Funcao para rotacionar a esquerda
+// Pre-condicao: nenhuma
+// Pos-condicao: retorna posicao do no rotacionado para a esquerda
 int rotacionar_esquerda(FILE* f, int pos)
 {
     no* h = ler_no(f, pos);
@@ -80,6 +101,9 @@ int rotacionar_esquerda(FILE* f, int pos)
     return pos_x;
 }
 
+// Funcao para rotacionar a direita
+// Pre-condicao: nenhuma
+// Pos-condicao: retorna posicao do no rotacionado para a direita
 int rotacionar_direita(FILE* f, int pos)
 {
     no* h = ler_no(f, pos);
@@ -101,6 +125,9 @@ int rotacionar_direita(FILE* f, int pos)
     return pos_x;
 }
 
+// Funcao para trocar cor de nos da arvore
+// Pre-condicao: nenhuma
+// Pre-condicao: altera cor da raiz e dos dois filhos (se nao forem nulos)
 void troca_cor(FILE* f, int pos)
 {
     no* x = ler_no(f, pos);
@@ -123,6 +150,9 @@ void troca_cor(FILE* f, int pos)
     free(x);
 }
 
+// Funcao auxiliar para inserir elemento
+// Pre-condicao: nenhuma
+// Pos-condicao: insere elemento e aplica balanceamento de cores
 int inserir_aux(FILE* f, cabecalho* cab, int chave, int pos)
 {
     if(pos == -1){
@@ -170,6 +200,9 @@ int inserir_aux(FILE* f, cabecalho* cab, int chave, int pos)
     return pos;
 }
 
+// Funcao principal para inserir elemento
+// Pre-condicao: arvore criada
+// Pos-condicao: insere elemento na arvore e garante raiz preta
 void inserir(FILE* f, int chave)
 {
     cabecalho* cab = ler_cabecalho(f);
@@ -187,6 +220,9 @@ void inserir(FILE* f, int chave)
     free(cab);
 }
 
+// Funcao auxiliar para buscar valor na arvore
+// Pre-condicao: nenhuma
+// Pos-condicao: retorna a posicao se encontrado o elemento, -1 se nao
 int busca_aux(FILE* f, int chave, int pos)
 {
     if(pos == -1)
@@ -212,6 +248,9 @@ int busca_aux(FILE* f, int chave, int pos)
     }
 }
 
+// Funcao para buscar valor na arvore
+// Pre-condicao: nenhuma
+// Pos-condicao: retorna a posicao se encontrado o elemento, -1 se nao
 int busca(FILE* f, int chave)
 {
     cabecalho* cab = ler_cabecalho(f);
@@ -222,6 +261,9 @@ int busca(FILE* f, int chave)
     return res;
 }
 
+// Funcao para mover no a esquerda
+// Pre-condicao: nenhuma
+// Pos-condicao: retorna posicao da subarvore rotacionada para a esquerda e com balanceamento de cor
 int mover_para_esquerda(FILE* f, int pos)
 {
     troca_cor(f, pos);
@@ -240,6 +282,9 @@ int mover_para_esquerda(FILE* f, int pos)
     return pos;
 }
 
+// Funcao para mover no a direita
+// Pre-condicao: nenhuma
+// Pos-condicao: retorna posicao da subarvore rotacionada para a direita e com balanceamento de cor
 int mover_para_direita(FILE* f, int pos)
 {
     troca_cor(f, pos);
@@ -252,6 +297,9 @@ int mover_para_direita(FILE* f, int pos)
     return pos;
 }
 
+// Funcao auxiliar para balancear apos remocao
+// Pre-condicao: nenhuma
+// Pos-condicao: aplica balanceamento de cores onde for necessario
 int balancear(FILE* f, int pos)
 {
     if(cor(f, ler_no(f, pos)->dir) == VERMELHO)
@@ -270,6 +318,9 @@ int balancear(FILE* f, int pos)
     return pos;
 }
 
+// Funcao auxiliar para remover o no menor
+// Pre-condicao: nenhuma
+// Pos-condicao: remove o menor no da subarvore da direita
 int remover_no_menor(FILE* f, cabecalho* cab, int pos)
 {
     if(ler_no(f, pos)->esq == -1)
@@ -288,6 +339,9 @@ int remover_no_menor(FILE* f, cabecalho* cab, int pos)
     return balancear(f, pos);
 }
 
+// Funcao auxiliar para encontrar o menor valor
+// Pre-condicao: nenhuma
+// Pos-condicao: encontra o no mais a esquerda da subarvore da direita
 int procurar_menor(FILE* f, int pos)
 {
     no* t = ler_no(f, pos);
@@ -303,6 +357,9 @@ int procurar_menor(FILE* f, int pos)
     return pos_menor;
 }
 
+// Funcao auxiliar para remover elemento
+// Pre-condicao: nenhuma
+// Pos-condicao: remove o elemento encontrado e aplica o balanceamento de cores
 int remover_aux(FILE* f, cabecalho* cab, int chave, int pos)
 {
     no* h = ler_no(f, pos);
@@ -351,6 +408,9 @@ int remover_aux(FILE* f, cabecalho* cab, int chave, int pos)
     return balancear(f, pos);
 }
 
+// Funcao principal para remover no
+// Pre-condicao: arvore criada
+// Pos-condicao: remove o elemento se encontrado
 void remover(FILE* f, int chave)
 {
     if(busca(f, chave) == -1)
@@ -371,7 +431,10 @@ void remover(FILE* f, int chave)
     free(cab);
 }
 
-void imprimir_aux(FILE* f, int pos)
+// Funcao auxiliar para imprimir arvore binaria
+// Pre-condicao: nenhuma
+// Pos-condicao: imprime arvore preOrder
+void imprimir_preOrder(FILE* f, int pos)
 {
     if(pos == -1)
         return;
@@ -385,22 +448,89 @@ void imprimir_aux(FILE* f, int pos)
     else
         printf("PRETO\n");
 
-    imprimir_aux(f, aux->esq);
-    imprimir_aux(f, aux->dir);
+    imprimir_preOrder(f, aux->esq);
+    imprimir_preOrder(f, aux->dir);
 
     free(aux);
 }
 
-void imprimir(FILE* f)
+// Funcao auxiliar para imprimir arvore binaria
+// Pre-condicao: nenhuma
+// Pos-condicao: imprime arvore inOrder
+void imprimir_inOrder(FILE* f, int pos)
+{
+    if(pos == -1)
+        return;
+
+    no* aux = ler_no(f, pos);
+
+
+    imprimir_inOrder(f, aux->esq);
+
+    printf("%d - ", aux->chave);
+    if(aux->cor == VERMELHO)
+        printf("VERMELHO\n");
+
+    else
+        printf("PRETO\n");
+
+    imprimir_inOrder(f, aux->dir);
+
+    free(aux);
+}
+
+// Funcao auxiliar para imprimir arvore binaria
+// Pre-condicao: nenhuma
+// Pos-condicao: imprime arvore posOrder
+void imprimir_posOrder(FILE* f, int pos)
+{
+    if(pos == -1)
+        return;
+
+    no* aux = ler_no(f, pos);
+
+    imprimir_posOrder(f, aux->esq);
+    imprimir_posOrder(f, aux->dir);
+
+    printf("%d - ", aux->chave);
+    if(aux->cor == VERMELHO)
+        printf("VERMELHO\n");
+
+    else
+        printf("PRETO\n");
+
+    free(aux);
+}
+
+// Funcao para imprimir arvore binaria
+// Pre-condicao: arvore criada
+// Pos-condicao: nenhuma
+void imprimir(FILE* f, int ordem)
 {
     cabecalho* cab = ler_cabecalho(f);
     int pos = cab->pos_raiz;
 
-    imprimir_aux(f, pos);
+    switch(ordem){
+    case 0:
+        imprimir_preOrder(f, pos);
+        break;
+    case 1:
+        imprimir_inOrder(f, pos);
+        break;
+    case 2:
+        imprimir_posOrder(f, pos);
+        break;
+    default:
+        break;
+    }
+
 
     free(cab);
 }
 
+// Funcao para imprimir arvore binaria
+// Pre-condicao: arvore criada
+// Pos-condicao: imprime arvore por niveis
 void imprimir_niveis(FILE* f)
 {
     cabecalho* cab = ler_cabecalho(f);
@@ -456,16 +586,9 @@ void imprimir_niveis(FILE* f)
     free(cab);
 }
 
-int contar_nos(FILE* f)
-{
-    cabecalho* cab = ler_cabecalho(f);
-
-    int res = contar_nos_aux(f, cab->pos_raiz);
-    free(cab);
-
-    return res;
-}
-
+// Funcao auxiliar para contar total de nos
+// Pre-condicao: nenhuma
+// Pos-condicao: retorna total de nos da arvore
 int contar_nos_aux(FILE* f, int pos)
 {
     if(pos == -1)
@@ -477,4 +600,52 @@ int contar_nos_aux(FILE* f, int pos)
     free(aux);
 
     return 1 + contar_nos_aux(f, pos_esq) + contar_nos_aux(f, pos_dir);
+}
+
+// Funcao para contar total de nos
+// Pre-condicao: arvore criada
+// Pos-condicao: retorna total de nos da arvore
+int contar_nos(FILE* f)
+{
+    cabecalho* cab = ler_cabecalho(f);
+
+    int res = contar_nos_aux(f, cab->pos_raiz);
+    free(cab);
+
+    return res;
+}
+
+// Funcao auxiliar para contar total de nos vermelhos
+// Pre-condicao: nenhuma
+// Pos-condicao: retorna total de nos vermelhos
+int contar_vermelhos_aux(FILE* f, int pos)
+{
+    if(pos == -1)
+        return 0;
+
+    no* h = ler_no(f, pos);
+    int pos_esq = h->esq;
+    int pos_dir = h->dir;
+
+    if(h->cor == VERMELHO){
+        free(h);
+        return 1 + contar_vermelhos_aux(f, pos_esq) + contar_vermelhos_aux(f, pos_dir);
+    }
+    else{
+        free(h);
+        return contar_vermelhos_aux(f, pos_esq) + contar_vermelhos_aux(f, pos_dir);
+    }
+}
+
+// Funcao para contar total de nos vermelhos
+// Pre-condicao: arvore criada
+// Pos-condicao: retorna total de nos vermelhos
+int total_nos_vermelhos(FILE* f)
+{
+    cabecalho* cab = ler_cabecalho(f);
+
+    int res = contar_vermelhos_aux(f, cab->pos_raiz);
+    free(cab);
+
+    return res;
 }
