@@ -15,11 +15,16 @@ struct lista{
 Lista* criar_lista()
 {
     Lista* novo;
-    novo = (Lista*) malloc(sizeof(Lista));
+    novo = malloc(sizeof(Lista));
 
     *novo = NULL;
 
     return novo;
+}
+
+int vazia(struct lista* l)
+{
+    return (l == NULL);
 }
 
 // Funcao para liberar lista circular
@@ -27,12 +32,9 @@ Lista* criar_lista()
 // Pos-condicao: retorna nulo para ponteiro void
 void* liberar_lista(Lista* l)
 {
-    if(l == NULL)
-        return l;
-
-    if(*l != NULL){
-        Elem* aux = *l;
-        Elem* anterior;
+    if(!vazia(*l)){
+        struct lista* aux = *l;
+        struct lista* anterior;
 
         do{
             anterior = aux;
@@ -52,7 +54,7 @@ void* liberar_lista(Lista* l)
 // Pos-condicao: adiciona elemento anterior ao primeiro elemento
 void inserir_elemento(Lista* l, int info)
 {
-    Elem* novo = (Elem*) malloc(sizeof(Elem));
+    struct lista* novo = malloc(sizeof(struct lista));
     novo->info = info;
 
     if(*l == NULL){
@@ -62,7 +64,7 @@ void inserir_elemento(Lista* l, int info)
     }
 
     else{
-        Elem* aux = (*l)->prox;
+        struct lista* aux = (*l)->prox;
 
         while(aux->prox != *l)
             aux = aux->prox;
@@ -72,7 +74,6 @@ void inserir_elemento(Lista* l, int info)
         novo->prox = *l;
         (*l)->ant = novo;
     }
-
 }
 
 // Funcao para remover elemento da lista
@@ -80,7 +81,7 @@ void inserir_elemento(Lista* l, int info)
 // Pos-condicao: nenhuma
 void remover_elemento(Lista* l, int info)
 {
-    Elem* aux = *l;
+    struct lista* aux = *l;
 
     do{
         aux = aux->prox;
@@ -95,7 +96,7 @@ void remover_elemento(Lista* l, int info)
     }
 
     else{
-        Elem* t = aux;
+        struct lista* t = aux;
         t = t->ant;
         t->prox = aux->prox;
         aux->prox->ant = t;
@@ -112,9 +113,9 @@ void remover_elemento(Lista* l, int info)
 // Pos-condicao: retorna 1 se encontrado, 0 se nao
 int buscar_elemento(Lista* l, int info)
 {
-    Elem* aux = *l;
+    struct lista* aux = *l;
 
-    if(aux == NULL)
+    if(vazia(aux))
         return 0;
 
     do{
@@ -132,7 +133,7 @@ int buscar_elemento(Lista* l, int info)
 // Pos-condicao: imprime a ida e a volta
 void imprimir_lista(Lista* l)
 {
-    Elem* aux = *l;
+    struct lista* aux = *l;
 
     if(aux == NULL){
         printf("NULL\n");

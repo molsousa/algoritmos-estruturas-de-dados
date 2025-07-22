@@ -9,13 +9,6 @@ struct lista{
     struct lista* prox;
 };
 
-// Funcao auxiliar para liberar cada elemento
-static void liberar_lista_cauda(Elem* l);
-// Funcao auxiliar para imprimir a ida
-static void rotina_ida(Elem *l);
-// Funcao auxiliar para imprimir a volta
-static void rotina_volta(Elem* l);
-
 // Funcao para criar lista
 // Pre-condicao: nenhum
 // Pos-condicao: retorna uma lista criada
@@ -27,12 +20,33 @@ Lista* criar_lista()
     return novo;
 }
 
+// Testa se um no eh vazio
+// Pre-condicao: lista criada
+// Pos-condicao: retorna 1 se vazio
+int vazia(struct lista* l)
+{
+    return (l == NULL);
+}
+
+// Funcao auxiliar para liberar cada elemento
+// Pre-condicao: nenhuma
+// Pos-condicao: destroi elementos da lista
+void liberar_lista_cauda(struct lista* l)
+{
+    if(vazia(l))
+        return;
+
+    liberar_lista_cauda(l->prox);
+
+    free(l);
+}
+
 // Funcao para liberar lista
 // Pre-condicao: lista criada
 // Pos-condicao: retorna nulo para ponteiro do tipo Lista
 Lista* liberar_lista(Lista* l)
 {
-    if(l == NULL)
+    if(vazia(*l))
         return l;
 
     liberar_lista_cauda(*l);
@@ -41,32 +55,21 @@ Lista* liberar_lista(Lista* l)
     return NULL;
 }
 
-// Funcao auxiliar para liberar cada elemento
-static void liberar_lista_cauda(Elem* l)
-{
-    if(l == NULL)
-        return;
-
-    liberar_lista_cauda(l->prox);
-
-    free(l);
-}
-
 // Funcao para inserir elemento
 // Pre-condicao: lista criada
 // Pos-condicao: insere elemento em cauda
 void inserir_elemento(Lista* l, int info)
 {
-    Elem* novo = (Elem*) malloc(sizeof(Elem));
+    struct lista* novo = malloc(sizeof(struct lista));
     novo->info = info;
     novo->ant = NULL;
     novo->prox = NULL;
 
-    if(*l == NULL)
+    if(vazia(*l))
         *l = novo;
 
     else{
-        Elem* aux = *l;
+        struct lista* aux = *l;
         while(aux->prox != NULL)
             aux = aux->prox;
 
@@ -80,18 +83,18 @@ void inserir_elemento(Lista* l, int info)
 // Pos-condicao: insere elemento de forma ordenada
 void inserir_elemento_ordenado(Lista* l, int info)
 {
-    Elem* novo = (Elem*) malloc(sizeof(Elem));
+    struct lista* novo = malloc(sizeof(struct lista));
     novo->info = info;
     novo->prox = NULL;
     novo->ant = NULL;
 
-    if(*l == NULL)
+    if(vazia(*l))
         *l = novo;
 
     else{
-        Elem* aux = *l;
+        struct lista* aux = *l;
 
-        while(aux->prox != NULL && aux->info <= info)
+        while(!vazia(aux->prox) && aux->info <= info)
             aux = aux->prox;
 
         if(aux == *l && aux->info > info){
@@ -99,14 +102,10 @@ void inserir_elemento_ordenado(Lista* l, int info)
             novo->prox = aux;
             *l = novo;
         }
-        else if(aux == *l && aux->info < info){
-            aux->prox = novo;
-            novo->ant = aux;
-        }
         else{
-            Elem* p = aux->ant;
+            struct lista* p = aux->ant;
 
-            if(aux->prox == NULL && aux->info <= info){
+            if(aux->info <= info){
                 aux->prox = novo;
                 novo->ant = aux;
             }
@@ -125,15 +124,15 @@ void inserir_elemento_ordenado(Lista* l, int info)
 // Pos-condicao: remove elemeento da lista
 void remover_elemento(Lista* l, int info)
 {
-    if(*l == NULL)
+    if(vazia(*l))
         return;
 
-    Elem* aux = *l;
+    struct lista* aux = *l;
 
-    while(aux != NULL && aux->info != info)
+    while(!vazia(aux) && aux->info != info)
         aux = aux->prox;
 
-    if(aux == NULL)
+    if(vazia(aux))
         return;
 
     if(aux == *l){
@@ -160,7 +159,7 @@ void remover_elemento(Lista* l, int info)
 // Pos-condicao: imprime a lista na tela
 void imprimir_lista(Lista* l)
 {
-    if(*l == NULL){
+    if(vazia(*l)){
         printf("NULL\n");
         return;
     }
@@ -172,14 +171,14 @@ void imprimir_lista(Lista* l)
 
 // Funcao para imprimir a lista ida e volta
 // Pre-condicao: lista criada
-// Pos-condicao: imprime a lista na tela
+// Pos-condicao: nenhuma
 void imprimir_ida_volta(Lista* l)
 {
     printf("IDA:   ");
     rotina_ida(*l);
-    Elem* aux = *l;
+    struct lista* aux = *l;
 
-    while(aux->prox != NULL)
+    while(!vazia(aux->prox))
         aux = aux->prox;
 
     printf("VOLTA: ");
@@ -188,9 +187,11 @@ void imprimir_ida_volta(Lista* l)
 }
 
 // Funcao auxiliar para imprimir a ida
-static void rotina_ida(Elem *l)
+// Pre-condicao: lista criada
+// Pos-condicao: imprime a rotina de ida
+void rotina_ida(struct lista* l)
 {
-    if(l == NULL){
+    if(vazia(l)){
         printf("NULL\n");
         return;
     }
@@ -201,9 +202,11 @@ static void rotina_ida(Elem *l)
 }
 
 // Funcao auxiliar para imprimir a volta
-static void rotina_volta(Elem *l)
+// Pre-condicao: lista criada
+// Pos-condicao: imprime a rotina de volta
+void rotina_volta(struct lista* l)
 {
-    if(l == NULL){
+    if(vazia(l)){
         printf("NULL");
         return;
     }

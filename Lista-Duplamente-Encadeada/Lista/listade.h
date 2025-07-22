@@ -1,8 +1,6 @@
 #ifndef LISTA_DUPLAMENTE_ENCADEADA_H_INCLUDED
 #define LISTA_DUPLAMENTE_ENCADEADA_H_INCLUDED
 
-// Definicao de tipo para manipulacao de lista
-typedef struct lista Elem;
 // Definicao de Lista Duplamente Encadeada
 typedef struct lista* Lista;
 
@@ -10,6 +8,16 @@ typedef struct lista* Lista;
 // Pre-condicao: nenhum
 // Pos-condicao: retorna uma lista criada
 Lista* criar_lista();
+
+// Testa se um no eh vazio
+// Pre-condicao: lista criada
+// Pos-condicao: retorna 1 se vazio
+int vazia(struct lista* l);
+
+// Funcao auxiliar para liberar cada elemento
+// Pre-condicao: nenhuma
+// Pos-condicao: destroi elementos da lista
+void liberar_lista_cauda(struct lista* l);
 
 // Funcao para liberar lista
 // Pre-condicao: lista criada
@@ -36,9 +44,19 @@ void remover_elemento(Lista* l, int info);
 // Pos-condicao: imprime a lista na tela
 void imprimir_lista(Lista* l);
 
+// Funcao auxiliar para imprimir a volta
+// Pre-condicao: lista criada
+// Pos-condicao: imprime a rotina de ida
+void rotina_ida(struct lista* l);
+
+// Funcao auxiliar para imprimir a volta
+// Pre-condicao: lista criada
+// Pos-condicao: imprime a rotina de volta
+void rotina_volta(struct lista* l);
+
 // Funcao para imprimir a lista ida e volta
 // Pre-condicao: lista criada
-// Pos-condicao: imprime a lista na tela
+// Pos-condicao: nenhuma
 void imprimir_ida_volta(Lista* l);
 
 #endif // LISTA_DUPLAMENTE_ENCADEADA_H_INCLUDED

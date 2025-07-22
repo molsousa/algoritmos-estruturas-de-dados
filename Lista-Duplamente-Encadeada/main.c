@@ -14,6 +14,8 @@ int main()
     inserir_elemento_ordenado(l, 7);
     inserir_elemento_ordenado(l, 2);
 
+    remover_elemento(l, 5);
+
     imprimir_ida_volta(l);
 
     l = liberar_lista(l);

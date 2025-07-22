@@ -3,8 +3,6 @@
 
 // Definicao de tipo para lista circular
 typedef struct lista* Lista;
-// Definicao de tipo para manipular lista circular
-typedef struct lista Elem;
 
 // Funcao para criar lista encadeada
 // Pre-condicao: ponteiro do tipo lista criado
