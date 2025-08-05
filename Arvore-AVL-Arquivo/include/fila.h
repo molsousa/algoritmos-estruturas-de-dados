@@ -7,9 +7,9 @@ typedef struct fila* Fila;
 
 Fila criar_fila();
 
-int fila_vazia(Fila);
+bool fila_vazia(Fila);
 
-int consultar_nulo(Fila);
+bool consultar_nulo(Fila);
 
 void enqueue(Fila, no*);
 

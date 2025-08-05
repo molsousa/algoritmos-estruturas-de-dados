@@ -21,14 +21,14 @@ Fila criar_fila()
     return f;
 }
 
-int fila_vazia(Fila f)
+bool fila_vazia(Fila f)
 {
     return (f->primeiro == NULL);
 }
 
-int consultar_nulo(Fila f)
+bool consultar_nulo(Fila f)
 {
-    if(f->primeiro == NULL)
+    if(f->primeiro->x == NULL)
         return true;
 
     return false;

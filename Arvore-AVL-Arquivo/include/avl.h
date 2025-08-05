@@ -48,9 +48,19 @@ void inserir(FILE*, int);
 
 int inserir_aux(FILE*, int, cabecalho*, int);
 
+void remover(FILE*, int);
+
+int remover_aux(FILE*, int, cabecalho*, int);
+
+bool busca(FILE*, int);
+
+bool busca_aux(FILE*, int, int);
+
 void imprimir(FILE*);
 
 void imprimir_aux(FILE*, int);
+
+void imprimir_livres(FILE*);
 
 void imprimir_niveis(FILE*);
 
