@@ -131,7 +131,6 @@ void inserir(FILE* f, int chave)
 
 int inserir_chave(FILE* f, int chave, cabecalho* cab, int pos)
 {
-    //printf("alo\n");
     if(pos == -1){
         int i;
         pos = cab->pos_topo++;
@@ -189,12 +188,13 @@ void inserir_aux(FILE* f, int chave, cabecalho* cab, int pos)
         }
 
         else{
-            inserir_aux(f, chave, cab, r->filhos[nova_pos]);
+            int pos_filho = r->filhos[nova_pos];
+            inserir_aux(f, chave, cab, pos_filho);
 
-            if(overflow(f, nova_pos)){
+            if(overflow(f, pos_filho)){
                 int m;
 
-                int pos_aux = split(f, nova_pos, &m, cab);
+                int pos_aux = split(f, pos_filho, &m, cab);
                 adicionar_direita(f, pos, nova_pos, m, pos_aux);
             }
         }

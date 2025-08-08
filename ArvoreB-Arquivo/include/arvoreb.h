@@ -2,7 +2,7 @@
 #define _ARVORE_B_H_INCLUDED
 
 #include <stdio.h>
-#define ORDEM 5
+#define ORDEM 7
 
 typedef enum{false = 0, true = 1}boolean;
 
@@ -27,6 +27,8 @@ void escrever_no(FILE*, noB*, int);
 noB* ler_no(FILE*, int);
 
 void inicializar(FILE*);
+
+boolean overflow(FILE*, int);
 
 int split(FILE*, int, int*, cabecalho*);
 
