@@ -237,10 +237,14 @@ void imprimir_niveis(FILE* f)
         return;
 
     Fila fila = criar_fila();
-    noB* aux = ler_no(f, pos);
+    noB* x = ler_no(f, pos);
+    noB* aux[1000];
+    int j = 0;
 
-    enqueue(fila, aux);
+    enqueue(fila, x);
     enqueue(fila, NULL);
+
+    aux[j++] = x;
 
     printf("[");
 
@@ -269,12 +273,16 @@ void imprimir_niveis(FILE* f)
             }
 
             for(i = 0; atual->filhos[i] != -1 && i < atual->num_chaves+1; i++){
-                aux = ler_no(f, atual->filhos[i]);
-                enqueue(fila, aux);
+                x = ler_no(f, atual->filhos[i]);
+                enqueue(fila, x);
+                aux[j++] = x;
             }
 
             if(!consultar_nulo(fila))
                 printf("[");
         }
     }
+    j--;
+    while(j >= 0)
+        free(aux[j--]);
 }
