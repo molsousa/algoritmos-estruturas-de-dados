@@ -35,6 +35,10 @@ int main()
     inserir(f, 2);
     inserir(f, 13);
     inserir(f, 91);
+    inserir(f, 18);
+    inserir(f, 22);
+    inserir(f, 26);
+    inserir(f, 15);
 
     imprimir_niveis(f);
 

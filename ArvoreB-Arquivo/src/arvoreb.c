@@ -2,12 +2,18 @@
 #include "../include/fila.h"
 #include "../include/arvoreb.h"
 
+// Funcao para escrever no cabecalho
+// Pre-condicao: cabecalho inicializado
+// Pos-condicao: nenhuma
 void escrever_cabecalho(FILE* f, cabecalho* cab)
 {
     fseek(f, 0, SEEK_SET);
     fwrite(cab, sizeof(cabecalho), 1, f);
 }
 
+// Funcao para ler cabecalho
+// Pre-condicao: cabecalho inicializado
+// Pos-condicao: retorna cabecalho na condicao atual
 cabecalho* ler_cabecalho(FILE* f)
 {
     cabecalho* cab = malloc(sizeof(cabecalho));
@@ -18,12 +24,18 @@ cabecalho* ler_cabecalho(FILE* f)
     return cab;
 }
 
+// Funcao para escrever em pagina B
+// Pre-condicao: nenhuma
+// Pos-condicao: nenhuma
 void escrever_no(FILE* f, noB* r, int pos)
 {
     fseek(f, sizeof(cabecalho) + sizeof(noB) * pos, SEEK_SET);
     fwrite(r, sizeof(noB), 1, f);
 }
 
+// Funcao para ler pagina B
+// Pre-condicao: nenhuma
+// Pos-condicao: retorna pagina B na condicao atual
 noB* ler_no(FILE* f, int pos)
 {
     noB* r = malloc(sizeof(noB));
@@ -34,6 +46,9 @@ noB* ler_no(FILE* f, int pos)
     return r;
 }
 
+// Funcao para inicializar arquivo binario
+// Pre-condicao: nenhuma
+// Pos-condicao: cria cabecalho
 void inicializar(FILE* f)
 {
     cabecalho* cab = malloc(sizeof(cabecalho));
@@ -46,6 +61,9 @@ void inicializar(FILE* f)
     free(cab);
 }
 
+// Funcao para verificar se houve overflow
+// Pre-condicao: nenhuma
+// Pos-condicao: retorna verdadeiro se um no estiver cheio
 boolean overflow(FILE* f, int pos)
 {
     noB* r = ler_no(f, pos);
@@ -59,6 +77,9 @@ boolean overflow(FILE* f, int pos)
     return false;
 }
 
+// Funcao para separar paginas
+// Pre-condicao: arvore criada
+// Pos-condicao: retorna posicao da pagina separada
 int split(FILE* f, int pos, int* m, cabecalho* cab)
 {
     noB* r = ler_no(f, pos);
@@ -84,6 +105,9 @@ int split(FILE* f, int pos, int* m, cabecalho* cab)
     return nova_pos;
 }
 
+// Funcao para buscar posicao para inserir um elemento
+// Pre-condicao: nenhuma
+// Pos-condicao: retorna 1 se encontrado no
 int busca_pos(FILE* f, int pos, int chave, int* pos_chave)
 {
     noB* r = ler_no(f, pos);
@@ -101,6 +125,9 @@ int busca_pos(FILE* f, int pos, int chave, int* pos_chave)
     return 0;
 }
 
+// Funcao para adicionar uma chave com um filho a uma pagina
+// Pre-condicao: nenhuma
+// Pos-condicao: adiciona uma chave com um filho a uma pagina e desloca as demais a direita se necessario
 void adicionar_direita(FILE* f, int pos_r, int pos_chave, int k, int pos_p)
 {
     int i;
@@ -119,6 +146,9 @@ void adicionar_direita(FILE* f, int pos_r, int pos_chave, int k, int pos_p)
     free(r);
 }
 
+// Funcao para inserir em arvore-B
+// Pre-condicao: arvore criada
+// Pos-condicao: nenhuma
 void inserir(FILE* f, int chave)
 {
     cabecalho* cab = ler_cabecalho(f);
@@ -129,6 +159,9 @@ void inserir(FILE* f, int chave)
     free(cab);
 }
 
+// Funcao para inserir em arvore-B
+// Pre-condicao: nenhuma
+// Pos-condicao: insere elemento na arvore
 int inserir_chave(FILE* f, int chave, cabecalho* cab, int pos)
 {
     if(pos == -1){
@@ -177,15 +210,17 @@ int inserir_chave(FILE* f, int chave, cabecalho* cab, int pos)
     return pos;
 }
 
+// Funcao auxiliar para inserir
+// Pre-condicao: nenhuma
+// Pos-condicao: utiliza as funcoes auxiliares para inserir determinado elemento
 void inserir_aux(FILE* f, int chave, cabecalho* cab, int pos)
 {
     noB* r = ler_no(f, pos);
     int nova_pos;
 
     if(!busca_pos(f, pos, chave, &nova_pos)){
-        if(r->filhos[0] == -1){
+        if(r->filhos[0] == -1)
             adicionar_direita(f, pos, nova_pos, chave, -1);
-        }
 
         else{
             int pos_filho = r->filhos[nova_pos];
@@ -202,6 +237,9 @@ void inserir_aux(FILE* f, int chave, cabecalho* cab, int pos)
     free(r);
 }
 
+// Funcao para imprimir arvore em linha
+// Pre-condicao: arvore criada
+// Pos-condicao: nenhuma
 void imprimir(FILE* f)
 {
     cabecalho* cab = ler_cabecalho(f);
@@ -210,6 +248,9 @@ void imprimir(FILE* f)
     free(cab);
 }
 
+// Funcao auxiliar para imprimir em preOrdem
+// Pre-condicao: nenhuma
+// Pos-condicao: imprime os elementos da arvore em pre-ordenado
 void imprimir_aux(FILE* f, int pos)
 {
     if(pos == -1)
@@ -227,6 +268,9 @@ void imprimir_aux(FILE* f, int pos)
     free(r);
 }
 
+// Funcao para imprimir por niveis
+// Pre-condicao: arvore criada
+// Pos-condicao: imprime todos os nos por niveis
 void imprimir_niveis(FILE* f)
 {
     cabecalho* cab = ler_cabecalho(f);

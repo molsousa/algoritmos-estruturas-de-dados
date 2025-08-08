@@ -1,5 +1,6 @@
 #ifndef _FILA_H_INCLUDED
 #define _FILA_H_INCLUDED
+
 #include "arvoreb.h"
 
 typedef struct fila* Fila;
