@@ -61,6 +61,19 @@ void inicializar(FILE* f)
     free(cab);
 }
 
+boolean eh_folha(FILE* f, int pos)
+{
+    noB* r = ler_no(f, pos);
+
+    if(r->filhos[0] == -1){
+        free(r);
+        return true;
+    }
+
+    free(r);
+    return false;
+}
+
 // Funcao para verificar se houve overflow
 // Pre-condicao: nenhuma
 // Pos-condicao: retorna verdadeiro se um no estiver cheio
@@ -219,7 +232,7 @@ void inserir_aux(FILE* f, int chave, cabecalho* cab, int pos)
     int nova_pos;
 
     if(!busca_pos(f, pos, chave, &nova_pos)){
-        if(r->filhos[0] == -1)
+        if(eh_folha(f, pos))
             adicionar_direita(f, pos, nova_pos, chave, -1);
 
         else{
@@ -235,6 +248,66 @@ void inserir_aux(FILE* f, int chave, cabecalho* cab, int pos)
         }
     }
     free(r);
+}
+
+boolean underflow(FILE* f, int pos)
+{
+    noB* r = ler_no(f, pos);
+    int num_chaves = r->num_chaves;
+    free(r);
+
+    if(pos != -1 && num_chaves < MIN_CHAVES)
+        return true;
+
+    return false;
+}
+
+void remover(FILE* f, int chave)
+{
+    cabecalho* cab = ler_cabecalho(f);
+
+    cab->pos_raiz = remover_aux(f, chave, cab, cab->pos_raiz);
+    escrever_cabecalho(f, cab);
+
+    free(cab);
+}
+
+int remover_aux(FILE* f, int chave, cabecalho* cab, int pos)
+{
+    if(pos == -1)
+        return pos;
+
+    int pos_busca;
+    int i;
+
+    if(busca_pos(f, pos, chave, &pos_busca)){
+        if(eh_folha(f, pos)){
+            noB* r = ler_no(f, pos);
+            for(i = pos_busca; i < r->num_chaves - 1; i++)
+                r->chaves[i] = r->chaves[i+1];
+
+            r->num_chaves--;
+            escrever_no(f, r, pos);
+        }
+        else{
+            noB* r = ler_no(f, pos);
+            noB* predecessor = ler_no(f, r->filhos[pos_busca]);
+            int pos_predecessor = pos_busca;
+
+            while(!eh_folha(f, r->filhos[pos_predecessor])){
+                pos_predecessor = predecessor->filhos[predecessor->num_chaves];
+                free(predecessor);
+                predecessor = ler_no(f, pos_predecessor);
+            }
+
+            int chave_predecessor = predecessor->chaves[predecessor->num_chaves-1];
+
+            r->chaves[pos_busca] = chave_predecessor;
+            r->filhos[pos_busca] = remover_aux(f, chave_predecessor, cab, r->filhos[pos_busca]);
+        }
+    }
+
+    return pos;
 }
 
 // Funcao para imprimir arvore em linha

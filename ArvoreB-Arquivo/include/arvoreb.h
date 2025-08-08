@@ -53,6 +53,8 @@ noB* ler_no(FILE*, int);
 // Entrada: arquivo de indice
 void inicializar(FILE*);
 
+boolean eh_folha(FILE* f, int pos);
+
 // Funcao para verificar se houve overflow
 // Pre-condicao: nenhuma
 // Pos-condicao: retorna verdadeiro se um no estiver cheio
@@ -94,6 +96,12 @@ int inserir_chave(FILE*, int, cabecalho*, int);
 // Pos-condicao: utiliza as funcoes auxiliares para inserir determinado elemento
 // Entrada: arquivo de indice, chave a ser inserida, cabecalho e posicao de determinada pagina
 void inserir_aux(FILE*, int, cabecalho*, int);
+
+boolean underflow(FILE*, int);
+
+void remover(FILE*, int);
+
+int remover_aux(FILE*, int, cabecalho*, int);
 
 // Funcao para imprimir arvore em linha
 // Pre-condicao: arvore criada
