@@ -5,8 +5,8 @@
 // Estrutura para arvore-B
 struct no{
     int num_chaves;
-    int chave[ORDEM-1];
-    struct no* filho[ORDEM];
+    int chave[ORDEM];
+    struct no* filho[ORDEM+1];
 };
 
 // Funcao para criar arvore
@@ -19,10 +19,13 @@ ArvoreB criar_arvore()
 
 // Funcao para verificar se uma arvore eh vazia
 // Pre-condicao: arvore criada
-// Pos-condicao: retorna 1 se vazia
-int vazia(ArvoreB raiz)
+// Pos-condicao: retorna verdadeiro se vazia
+boolean vazia(ArvoreB raiz)
 {
-    return (raiz == NULL);
+    if(raiz == NULL)
+        return true;
+
+    return false;
 }
 
 // Funcao que separa nos
@@ -63,18 +66,24 @@ int busca_pos(ArvoreB raiz, int info, int* pos)
 
 // Funcao para verificar se um no eh folha
 // Pre-condicao: arvore criada
-// Pos-condicao: retorna 1 se folha
-int eh_folha(ArvoreB raiz)
+// Pos-condicao: retorna verdadeiro se folha
+boolean eh_folha(ArvoreB raiz)
 {
-    return (raiz->filho[0] == NULL);
+    if(raiz->filho[0] == NULL)
+        return true;
+
+    return false;
 }
 
 // Funcao para verificar se houve overflow
 // Pre-condicao: nenhuma
-// Pos-condicao: retorna 1 se um no estiver cheio
-int overflow(ArvoreB raiz)
+// Pos-condicao: retorna verdadeiro se um no estiver cheio
+boolean overflow(ArvoreB raiz)
 {
-    return (raiz->num_chaves == ORDEM);
+    if(raiz->num_chaves == ORDEM)
+        return true;
+
+    return false;
 }
 
 // Funcao para adicionar uma chave com um filho a um no
@@ -153,10 +162,13 @@ void inserir_aux(ArvoreB raiz, int info)
 
 // Funcao para verificar se ha underflow
 // Pre-condicao: nenhuma
-// Pos-condicao: retorna 1 se underflow
-int underflow(ArvoreB no)
+// Pos-condicao: retorna verdadeiro se underflow
+boolean underflow(ArvoreB no)
 {
-    return(no != NULL && no->num_chaves < MIN_CHAVES);
+    if(no != NULL && no->num_chaves < MIN_CHAVES)
+        return true;
+
+    return false;
 }
 
 // Funcao para remover elemento

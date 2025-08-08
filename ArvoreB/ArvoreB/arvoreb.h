@@ -1,10 +1,13 @@
 #ifndef ARVORE_B_H_INCLUDED
 #define ARVORE_B_H_INCLUDED
-#define ORDEM 5
+
+#define ORDEM 7
 #define MIN_CHAVES ((ORDEM - 1) / 2)
 
-// Definicao de itpo para arvore-B
+// Definicao de tipo para arvoreB
 typedef struct no* ArvoreB;
+// Definicao de tipo booleano
+typedef enum{false = 0, true = 1}boolean;
 
 // Funcao para criar arvore
 // Pre-condicao: nenhuma
@@ -13,8 +16,8 @@ ArvoreB criar_arvore();
 
 // Funcao para verificar se uma arvore eh vazia
 // Pre-condicao: arvore criada
-// Pos-condicao: retorna 1 se vazia
-int vazia(ArvoreB raiz);
+// Pos-condicao: retorna verdadeiro se vazia
+boolean vazia(ArvoreB raiz);
 
 // Funcao que separa nos
 // Pre-condicao: arvore criada
@@ -28,13 +31,13 @@ int busca_pos(ArvoreB raiz, int info, int* pos);
 
 // Funcao para verificar se um no eh folha
 // Pre-condicao: arvore criada
-// Pos-condicao: retorna 1 se folha
-int eh_folha(ArvoreB raiz);
+// Pos-condicao: retorna verdadeiro se folha
+boolean eh_folha(ArvoreB raiz);
 
 // Funcao para verificar se houve overflow
 // Pre-condicao: nenhuma
-// Pos-condicao: retorna 1 se um no estiver cheio
-int overflow(ArvoreB raiz);
+// Pos-condicao: retorna verdadeiro se um no estiver cheio
+boolean overflow(ArvoreB raiz);
 
 // Funcao para adicionar uma chave com um filho a um no
 // Pre-condicao: nenhuma
@@ -53,8 +56,8 @@ void inserir_aux(ArvoreB raiz, int info);
 
 // Funcao para verificar se ha underflow
 // Pre-condicao: nenhuma
-// Pos-condicao: retorna 1 se underflow
-int underflow(ArvoreB no);
+// Pos-condicao: retorna verdadeiro se underflow
+boolean underflow(ArvoreB no);
 
 // Funcao para remover elemento
 // Pre-condicao: arvore criada
