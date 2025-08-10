@@ -61,6 +61,14 @@ void inicializar(FILE* f)
     free(cab);
 }
 
+boolean vazia(int pos)
+{
+    if(pos == -1)
+        return true;
+
+    return false;
+}
+
 boolean eh_folha(FILE* f, int pos)
 {
     noB* r = ler_no(f, pos);
@@ -97,7 +105,7 @@ int split(FILE* f, int pos, int* m, cabecalho* cab)
 {
     noB* r = ler_no(f, pos);
     noB y;
-    int nova_pos = cab->pos_topo++;
+    int nova_pos = obter_pos_livre(f, cab);
 
     int q = r->num_chaves/2;
     y.num_chaves = r->num_chaves - q - 1;
@@ -177,9 +185,9 @@ void inserir(FILE* f, int chave)
 // Pos-condicao: insere elemento na arvore
 int inserir_chave(FILE* f, int chave, cabecalho* cab, int pos)
 {
-    if(pos == -1){
+    if(vazia(pos)){
         int i;
-        pos = cab->pos_topo++;
+        pos = obter_pos_livre(f, cab);
         noB novo;
         novo.chaves[0] = chave;
 
@@ -197,7 +205,7 @@ int inserir_chave(FILE* f, int chave, cabecalho* cab, int pos)
             int i;
 
             int pos_split = split(f, pos, &m, cab);
-            int nova_pos = cab->pos_topo++;
+            int nova_pos = obter_pos_livre(f, cab);
 
             noB* nova_raiz = malloc(sizeof(noB));
             noB* r = ler_no(f, pos);
@@ -256,7 +264,7 @@ boolean underflow(FILE* f, int pos)
     int num_chaves = r->num_chaves;
     free(r);
 
-    if(pos != -1 && num_chaves < MIN_CHAVES)
+    if(!vazia(pos) && num_chaves < MIN_CHAVES)
         return true;
 
     return false;
@@ -267,6 +275,21 @@ void remover(FILE* f, int chave)
     cabecalho* cab = ler_cabecalho(f);
 
     cab->pos_raiz = remover_aux(f, chave, cab, cab->pos_raiz);
+
+    if(!vazia(cab->pos_raiz)){
+        noB* raiz = ler_no(f, cab->pos_raiz);
+
+        if(raiz->num_chaves == 0){
+            int ant_raiz = cab->pos_raiz;
+            cab->pos_raiz = raiz->filhos[0];
+            liberar_pos(f, cab, ant_raiz);
+
+            free(raiz);
+        }
+        else
+            free(raiz);
+    }
+
     escrever_cabecalho(f, cab);
 
     free(cab);
@@ -274,7 +297,7 @@ void remover(FILE* f, int chave)
 
 int remover_aux(FILE* f, int chave, cabecalho* cab, int pos)
 {
-    if(pos == -1)
+    if(vazia(pos))
         return pos;
 
     int pos_busca;
@@ -291,23 +314,230 @@ int remover_aux(FILE* f, int chave, cabecalho* cab, int pos)
         }
         else{
             noB* r = ler_no(f, pos);
+            int pos_predecessor = r->filhos[pos_busca];
             noB* predecessor = ler_no(f, r->filhos[pos_busca]);
-            int pos_predecessor = pos_busca;
 
-            while(!eh_folha(f, r->filhos[pos_predecessor])){
+            while(!eh_folha(f, pos_predecessor)){
                 pos_predecessor = predecessor->filhos[predecessor->num_chaves];
                 free(predecessor);
                 predecessor = ler_no(f, pos_predecessor);
             }
 
             int chave_predecessor = predecessor->chaves[predecessor->num_chaves-1];
+            free(predecessor);
 
             r->chaves[pos_busca] = chave_predecessor;
             r->filhos[pos_busca] = remover_aux(f, chave_predecessor, cab, r->filhos[pos_busca]);
+
+            escrever_no(f, r, pos);
+            free(r);
+
+            if(underflow(f, r->filhos[pos_busca]))
+                pos = tratar_underflow(f, pos, pos_busca, cab);
         }
+    }
+    else{
+        noB* r = ler_no(f, pos);
+        r->filhos[pos_busca] = remover_aux(f, chave, cab, r->filhos[pos_busca]);
+        free(r);
+
+        r = ler_no(f, pos);
+
+        if(underflow(f, r->filhos[pos_busca]))
+            pos = tratar_underflow(f, pos, pos_busca, cab);
+
+        free(r);
+    }
+    noB* r = ler_no(f, pos);
+
+    if(r->num_chaves == 0){
+        free(r);
+        return -1;
     }
 
     return pos;
+}
+
+int tratar_underflow(FILE* f, int pos, int pos_busca, cabecalho* cab)
+{
+    noB* r = ler_no(f, pos);
+    int i;
+
+    if(pos_busca > 0 && ler_no(f, r->filhos[pos_busca - 1])->num_chaves > MIN_CHAVES){
+        noB* irmao_esq = ler_no(f, r->filhos[pos_busca - 1]);
+        noB* no_underflow = ler_no(f, r->filhos[pos_busca]);
+
+        for(i = no_underflow->num_chaves; i > 0; i--)
+            no_underflow->chaves[i] = no_underflow->chaves[i-1];
+
+        if(!eh_folha(f, r->filhos[pos_busca]))
+            for(i = no_underflow->num_chaves; i > 0; i--)
+                no_underflow->filhos[i] = no_underflow->filhos[i-1];
+
+        no_underflow->chaves[0] = r->chaves[pos_busca - 1];
+        r->chaves[pos_busca - 1] = irmao_esq->chaves[irmao_esq->num_chaves-1];
+
+        if(!eh_folha(f, r->filhos[pos_busca]))
+            no_underflow->filhos[0] = irmao_esq->filhos[irmao_esq->num_chaves];
+
+        no_underflow->num_chaves++;
+        irmao_esq->num_chaves--;
+
+        escrever_no(f, r, pos);
+        escrever_no(f, no_underflow, r->filhos[pos_busca]);
+        escrever_no(f, irmao_esq, r->filhos[pos_busca - 1]);
+
+        free(irmao_esq);
+        free(no_underflow);
+    }
+
+    else if(pos_busca < r->num_chaves && ler_no(f, r->filhos[pos_busca+1])->num_chaves > MIN_CHAVES){
+        noB* irmao_dir = ler_no(f, r->filhos[pos_busca+1]);
+        noB* no_underflow = ler_no(f, r->filhos[pos_busca]);
+
+        no_underflow->chaves[no_underflow->num_chaves] = r->chaves[pos_busca];
+        r->chaves[pos_busca] = irmao_dir->chaves[0];
+
+        if(!eh_folha(f, r->filhos[pos_busca]))
+            no_underflow->filhos[no_underflow->num_chaves+1] = irmao_dir->filhos[0];
+
+        no_underflow->num_chaves++;
+        irmao_dir->num_chaves--;
+
+        for(i = 0; i < irmao_dir->num_chaves; i++)
+            irmao_dir->chaves[i] = irmao_dir->chaves[i+1];
+
+        if(!eh_folha(f, r->filhos[pos_busca+1]))
+            for(i = 0; i <= irmao_dir->num_chaves; i++)
+                irmao_dir->filhos[i] = irmao_dir->filhos[i+1];
+
+        escrever_no(f, r, pos);
+        escrever_no(f, no_underflow, r->filhos[pos_busca]);
+        escrever_no(f, irmao_dir, r->filhos[pos_busca+1]);
+
+        free(irmao_dir);
+        free(no_underflow);
+    }
+    else{
+        if(pos_busca > 0){
+            noB* irmao_esq = ler_no(f, r->filhos[pos_busca - 1]);
+            noB* no_underflow = ler_no(f, r->filhos[pos_busca]);
+
+            irmao_esq->chaves[irmao_esq->num_chaves] = r->chaves[pos_busca - 1];
+            int pos_copia = irmao_esq->num_chaves+1;
+
+            for(i = 0; i < no_underflow->num_chaves; i++)
+                irmao_esq->chaves[pos_copia+i] = no_underflow->chaves[i];
+
+            if(!eh_folha(f, r->filhos[pos_busca]))
+                for(i = 0; i <= no_underflow->num_chaves; i++)
+                    irmao_esq->filhos[pos_copia + i] = no_underflow->filhos[i];
+
+            irmao_esq->num_chaves += (no_underflow->num_chaves+1);
+
+            int pos_liberado = r->filhos[pos_busca];
+            liberar_pos(f, cab, pos_liberado);
+
+            for(i = pos_busca-1; i < r->num_chaves-1; i++)
+                r->chaves[i] = r->chaves[i+1];
+
+            for(i = pos_busca; i < r->num_chaves; i++)
+                r->filhos[i] = r->filhos[i+1];
+
+            r->num_chaves--;
+
+            escrever_no(f, irmao_esq, r->filhos[pos_busca - 1]);
+            escrever_no(f, r, pos);
+
+            free(irmao_esq);
+            free(no_underflow);
+        }
+        else{
+            noB* irmao_dir = ler_no(f, r->filhos[pos_busca+1]);
+            noB* no_underflow = ler_no(f, r->filhos[pos_busca]);
+
+            no_underflow->chaves[no_underflow->num_chaves] = r->chaves[pos_busca];
+            int pos_copia = no_underflow->num_chaves+1;
+
+            for(i = 0; i < irmao_dir->num_chaves; i++)
+                no_underflow->chaves[pos_copia+i] = irmao_dir->chaves[i];
+
+            if(!eh_folha(f, r->filhos[pos_busca+1]))
+                for(i = 0; i <= irmao_dir->num_chaves; i++)
+                    no_underflow->filhos[pos_copia+i] = irmao_dir->filhos[i];
+
+            no_underflow->num_chaves += (irmao_dir->num_chaves+1);
+
+            int pos_liberado = r->filhos[pos_busca+1];
+            liberar_pos(f, cab, pos_liberado);
+
+            for(i = pos_busca; i < r->num_chaves - 1; i++)
+                r->chaves[i] = r->chaves[i+1];
+
+            for(i = pos_busca + 1; i < r->num_chaves; i++)
+                r->filhos[i] = r->filhos[i+1];
+
+            r->num_chaves--;
+
+            escrever_no(f, no_underflow, r->filhos[pos_busca]);
+            escrever_no(f, r, pos);
+
+            free(irmao_dir);
+            free(no_underflow);
+        }
+    }
+
+    free(r);
+    return pos;
+}
+
+int obter_pos_livre(FILE* f, cabecalho* cab)
+{
+    int pos;
+
+    if(!vazia(cab->pos_livre)){
+        pos = cab->pos_livre;
+        noB* no_livre = ler_no(f, pos);
+        cab->pos_livre = no_livre->filhos[0];
+
+        free(no_livre);
+    }
+    else
+        pos = cab->pos_topo++;
+
+    return pos;
+}
+
+void liberar_pos(FILE* f, cabecalho* cab, int pos_livre)
+{
+    if(pos_livre == -1)
+        return;
+
+    noB* no_livre = ler_no(f, pos_livre);
+
+    no_livre->filhos[0] = cab->pos_livre;
+    no_livre->num_chaves = 0;
+
+    cab->pos_livre = pos_livre;
+
+    escrever_no(f, no_livre, pos_livre);
+    free(no_livre);
+}
+
+void posicoes_livres(FILE* f)
+{
+    cabecalho* cab = ler_cabecalho(f);
+    int pos_livre = cab->pos_livre;
+    noB* aux;
+
+    while(pos_livre != -1){
+        aux = ler_no(f, pos_livre);
+
+        printf("Posicao: %d\n", pos_livre);
+        pos_livre = aux->filhos[0];
+        free(aux);
+    }
+    free(cab);
 }
 
 // Funcao para imprimir arvore em linha

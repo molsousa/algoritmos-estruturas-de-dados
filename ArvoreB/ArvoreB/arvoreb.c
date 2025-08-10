@@ -210,7 +210,7 @@ ArvoreB remover(ArvoreB raiz, int info)
             raiz = tratar_underflow(raiz, pos);
     }
 
-    if (raiz->num_chaves == 0) {
+    if(raiz->num_chaves == 0){
         ArvoreB nova_raiz = raiz->filho[0];
         free(raiz);
         return nova_raiz;

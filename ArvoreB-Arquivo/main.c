@@ -10,7 +10,6 @@ int main()
     inserir(f, 10);
     inserir(f, 7);
     inserir(f, 6);
-    /*
     inserir(f, 9);
     inserir(f, 3);
     inserir(f, 1);
@@ -39,9 +38,15 @@ int main()
     inserir(f, 22);
     inserir(f, 26);
     inserir(f, 15);
-    */
+/*
+*/
 
-    remover(f, 5);
+    remover(f, 91);
+    remover(f, 45);
+    remover(f, 12);
+    remover(f, 7);
+
+    posicoes_livres(f);
 
     imprimir_niveis(f);
 

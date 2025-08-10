@@ -53,7 +53,9 @@ noB* ler_no(FILE*, int);
 // Entrada: arquivo de indice
 void inicializar(FILE*);
 
-boolean eh_folha(FILE* f, int pos);
+boolean vazia(int);
+
+boolean eh_folha(FILE*, int);
 
 // Funcao para verificar se houve overflow
 // Pre-condicao: nenhuma
@@ -102,6 +104,14 @@ boolean underflow(FILE*, int);
 void remover(FILE*, int);
 
 int remover_aux(FILE*, int, cabecalho*, int);
+
+int tratar_underflow(FILE*, int, int, cabecalho*);
+
+int obter_pos_livre(FILE*, cabecalho*);
+
+void liberar_pos(FILE*, cabecalho*, int);
+
+void posicoes_livres(FILE*);
 
 // Funcao para imprimir arvore em linha
 // Pre-condicao: arvore criada
