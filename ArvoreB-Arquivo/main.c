@@ -40,7 +40,6 @@ int main()
     inserir(f, 15);
 /*
 */
-
     remover(f, 91);
     remover(f, 45);
     remover(f, 12);

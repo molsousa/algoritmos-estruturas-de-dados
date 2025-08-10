@@ -53,9 +53,23 @@ noB* ler_no(FILE*, int);
 // Entrada: arquivo de indice
 void inicializar(FILE*);
 
+// Funcao para verificar se vazia
+// Pre-condicao: nenhuma
+// Pos-condicao: retorna verdadeiro se vazia
+// Entrada: posicao da pagina
 boolean vazia(int);
 
+// Funcao para verificar se uma pagina eh folha
+// Pre-condicao: nenhuma
+// Pos-condicao: retorna verdadeiro se folha
+// Entrada: arquivo de indice, posicao da pagina B
 boolean eh_folha(FILE*, int);
+
+// Funcao para obter posicoes livres para insercao
+// Pre-condicao: nenhuma
+// Pos-condicao: retorna nova posicao ou reaproveita se tiver
+// Entrada: arquivo de indice, cabecalho
+int obter_pos_livre(FILE*, cabecalho*);
 
 // Funcao para verificar se houve overflow
 // Pre-condicao: nenhuma
@@ -99,18 +113,40 @@ int inserir_chave(FILE*, int, cabecalho*, int);
 // Entrada: arquivo de indice, chave a ser inserida, cabecalho e posicao de determinada pagina
 void inserir_aux(FILE*, int, cabecalho*, int);
 
+// Funcao para verificar underflow
+// Pre-condicao: nenhuma
+// Pos-condicao: retorna verdadeiro se underflow
+// Entrada: arquivo de indice, posicao da pagina
 boolean underflow(FILE*, int);
 
+// Funcao para remover elemento
+// Pre-condicao: arvore criada
+// Pos-condicao: nenhuma
+// Entrada: arquivo de indice, chave a ser removida
 void remover(FILE*, int);
 
+// Funcao auxiliar para remover elemento
+// Pre-condicao: nenhuma
+// Pos-condicao: remove elemento
+// Entrada: arquivo de indice, chave a ser removida, cabecalho e posicao de determinada pagina
 int remover_aux(FILE*, int, cabecalho*, int);
 
+// Funcao para tratamento de underflow
+// Pre-condicao: numero de chaves < ORDEM/2
+// Pos-condicao: corrige underflow caso preciso
+// Entrada: arquivo de indice, posicao da pagina, posicao com underflow e cabecalho
 int tratar_underflow(FILE*, int, int, cabecalho*);
 
-int obter_pos_livre(FILE*, cabecalho*);
-
+// Funcao para liberar posicao
+// Pre-condicao: pagina removida
+// Pos-condicao: nenhuma
+// Entrada: arquivo de indice, cabecalho, posicao a ser liberada
 void liberar_pos(FILE*, cabecalho*, int);
 
+// Funcao para verificar posicoes livres
+// Pre-condicao: arvore criada
+// Pos-condicao: nenhuma
+// Entrada: arquivo de indice
 void posicoes_livres(FILE*);
 
 // Funcao para imprimir arvore em linha

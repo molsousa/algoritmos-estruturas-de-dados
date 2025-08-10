@@ -61,6 +61,9 @@ void inicializar(FILE* f)
     free(cab);
 }
 
+// Funcao para verificar se vazia
+// Pre-condicao: nenhuma
+// Pos-condicao: retorna verdadeiro se vazia
 boolean vazia(int pos)
 {
     if(pos == -1)
@@ -69,6 +72,9 @@ boolean vazia(int pos)
     return false;
 }
 
+// Funcao para verificar se uma pagina eh folha
+// Pre-condicao: nenhuma
+// Pos-condicao: retorna verdadeiro se folha
 boolean eh_folha(FILE* f, int pos)
 {
     noB* r = ler_no(f, pos);
@@ -80,6 +86,26 @@ boolean eh_folha(FILE* f, int pos)
 
     free(r);
     return false;
+}
+
+// Funcao para obter posicoes livres para insercao
+// Pre-condicao: nenhuma
+// Pos-condicao: retorna nova posicao ou reaproveita se tiver
+int obter_pos_livre(FILE* f, cabecalho* cab)
+{
+    int pos;
+
+    if(!vazia(cab->pos_livre)){
+        pos = cab->pos_livre;
+        noB* no_livre = ler_no(f, pos);
+        cab->pos_livre = no_livre->filhos[0];
+
+        free(no_livre);
+    }
+    else
+        pos = cab->pos_topo++;
+
+    return pos;
 }
 
 // Funcao para verificar se houve overflow
@@ -258,6 +284,9 @@ void inserir_aux(FILE* f, int chave, cabecalho* cab, int pos)
     free(r);
 }
 
+// Funcao para verificar underflow
+// Pre-condicao: nenhuma
+// Pos-condicao: retorna verdadeiro se underflow
 boolean underflow(FILE* f, int pos)
 {
     noB* r = ler_no(f, pos);
@@ -270,6 +299,9 @@ boolean underflow(FILE* f, int pos)
     return false;
 }
 
+// Funcao para remover elemento
+// Pre-condicao: arvore criada
+// Pos-condicao: nenhuma
 void remover(FILE* f, int chave)
 {
     cabecalho* cab = ler_cabecalho(f);
@@ -295,6 +327,9 @@ void remover(FILE* f, int chave)
     free(cab);
 }
 
+// Funcao auxiliar para remover elemento
+// Pre-condicao: nenhuma
+// Pos-condicao: remove elemento
 int remover_aux(FILE* f, int chave, cabecalho* cab, int pos)
 {
     if(vazia(pos))
@@ -358,6 +393,9 @@ int remover_aux(FILE* f, int chave, cabecalho* cab, int pos)
     return pos;
 }
 
+// Funcao para tratamento de underflow
+// Pre-condicao: numero de chaves < ORDEM/2
+// Pos-condicao: corrige underflow caso preciso
 int tratar_underflow(FILE* f, int pos, int pos_busca, cabecalho* cab)
 {
     noB* r = ler_no(f, pos);
@@ -491,23 +529,9 @@ int tratar_underflow(FILE* f, int pos, int pos_busca, cabecalho* cab)
     return pos;
 }
 
-int obter_pos_livre(FILE* f, cabecalho* cab)
-{
-    int pos;
-
-    if(!vazia(cab->pos_livre)){
-        pos = cab->pos_livre;
-        noB* no_livre = ler_no(f, pos);
-        cab->pos_livre = no_livre->filhos[0];
-
-        free(no_livre);
-    }
-    else
-        pos = cab->pos_topo++;
-
-    return pos;
-}
-
+// Funcao para liberar posicao
+// Pre-condicao: pagina removida
+// Pos-condicao: nenhuma
 void liberar_pos(FILE* f, cabecalho* cab, int pos_livre)
 {
     if(pos_livre == -1)
@@ -524,6 +548,9 @@ void liberar_pos(FILE* f, cabecalho* cab, int pos_livre)
     free(no_livre);
 }
 
+// Funcao para verificar posicoes livres
+// Pre-condicao: arvore criada
+// Pos-condicao: nenhuma
 void posicoes_livres(FILE* f)
 {
     cabecalho* cab = ler_cabecalho(f);
