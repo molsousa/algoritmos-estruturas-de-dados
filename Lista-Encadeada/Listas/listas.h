@@ -94,6 +94,12 @@ int contar_distintos(Lista* l);
 // Pos-condicao: retorna 1 se o valor existe na lista
 int valor_existe(Lista* l, int info);
 
+int contar_elementos(Lista* l);
+
+Lista* merge_ord(Lista* l1, Lista* l2);
+
+Lista* intercala(Lista* p, Lista* l1, Lista* l2, int n1, int n2);
+
 // Funcao para imprimir lista
 // Pre-condicao: lista criada
 // Pos-condicao: imprime na tela os elementos inseridos

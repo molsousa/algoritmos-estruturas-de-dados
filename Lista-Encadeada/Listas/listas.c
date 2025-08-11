@@ -324,6 +324,49 @@ int valor_existe(Lista* l, int info)
     return valor_existe(l->prox, info);
 }
 
+int contar_elementos(Lista* l)
+{
+    if(l == NULL)
+        return 0;
+
+    return 1 + contar_elementos(l->prox);
+}
+
+Lista* merge_ord(Lista* l1, Lista* l2)
+{
+    Lista* novo = NULL;
+
+    return intercala(novo, l1, l2, contar_elementos(l1), contar_elementos(l2));
+}
+
+Lista* intercala(Lista* p, Lista* l1, Lista* l2, int n1, int n2)
+{
+    if(n1 == 0 && n2 == 0)
+        return NULL;
+
+    if(n1 > 0 && n2 > 0){
+        if(l1->info < l2->info){
+            p = l1;
+            p->prox = intercala(p->prox, l1->prox, l2, n1-1, n2);
+        }
+        else{
+            p = l2;
+            p->prox = intercala(p->prox, l1, l2->prox, n1, n2-1);
+        }
+    }
+    else if(n1 > 0){
+        p = l1;
+        p->prox = intercala(p->prox, l1->prox, l2, n1-1, n2);
+    }
+
+    else if(n2 > 0){
+        p = l2;
+        p->prox = intercala(p->prox, l1, l2->prox, n1, n2-1);
+    }
+
+    return p;
+}
+
 // Funcao para imprimir lista
 // Pre-condicao: lista criada
 // Pos-condicao: imprime na tela os elementos inseridos
