@@ -16,8 +16,9 @@ int main()
     raiz = inserir(raiz, 7);
     raiz = inserir(raiz, 11);
 
-    //raiz = remover(raiz, 4);
-    //raiz = remover(raiz, 50);
+    raiz = remover(raiz, 50);
+    raiz = remover(raiz, 34);
+    raiz = remover(raiz, 15);
     raiz = remover(raiz, 6);
 
     imprimir_niveis(raiz);

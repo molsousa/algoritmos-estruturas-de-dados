@@ -23,73 +23,73 @@ arvore23 criar_arvore()
 // Funcao para verificar se uma arvore eh vazia
 // Pre-condicao: arvore criada
 // Pos-condicao: retorna 1 se vazia
-int vazia(arvore23 raiz)
+int vazia(arvore23 r)
 {
-    return (raiz == NULL);
+    return (r == NULL);
 }
 
 // Funcao para buscar na arvore
 // Pre-condicao: arvore criada
 // Pos-condicao: retorna o no buscado
-arvore23 busca(arvore23 raiz, int chave)
+arvore23 busca(arvore23 r, int chave)
 {
-    if(vazia(raiz))
-        return raiz;
+    if(vazia(r))
+        return r;
 
-    if(raiz->chave_esq == chave)
-        return raiz;
+    if(r->chave_esq == chave)
+        return r;
 
-    if(raiz->num_chaves == 2 && raiz->chave_dir == chave)
-        return raiz;
+    if(r->num_chaves == 2 && r->chave_dir == chave)
+        return r;
 
-    if(chave < raiz->chave_esq)
-        return busca(raiz->esq, chave);
+    if(chave < r->chave_esq)
+        return busca(r->esq, chave);
 
-    else if(raiz->num_chaves == 1)
-        return busca(raiz->meio, chave);
+    else if(r->num_chaves == 1)
+        return busca(r->meio, chave);
 
-    else if(chave < raiz->chave_dir)
-        return busca(raiz->meio, chave);
+    else if(chave < r->chave_dir)
+        return busca(r->meio, chave);
 
     else
-        return busca(raiz->dir, chave);
+        return busca(r->dir, chave);
 }
 
 // Funcao auxiliar para inserir em 23
 // Pre-condicao: nenhuma
 // Pos-condicao: insere elemento
-arvore23 inserir_aux(arvore23 raiz, int chave, int* chave_promovida)
+arvore23 inserir_aux(arvore23 r, int chave, int* chave_promovida)
 {
-    if(eh_folha(raiz)){
-        if(raiz->num_chaves == 1){
-            adiciona_chave(raiz, chave, NULL);
+    if(eh_folha(r)){
+        if(r->num_chaves == 1){
+            adiciona_chave(r, chave, NULL);
             return NULL;
         }
         else
-            return split(raiz, chave, NULL, chave_promovida);
+            return split(r, chave, NULL, chave_promovida);
     }
     else{
         arvore23 p_aux;
         int chave_aux;
 
-        if(chave < raiz->chave_esq)
-            p_aux = inserir_aux(raiz->esq, chave, &chave_aux);
+        if(chave < r->chave_esq)
+            p_aux = inserir_aux(r->esq, chave, &chave_aux);
 
-        else if((raiz->num_chaves == 1) || (chave < raiz->chave_dir))
-            p_aux = inserir_aux(raiz->meio, chave, &chave_aux);
+        else if((r->num_chaves == 1) || (chave < r->chave_dir))
+            p_aux = inserir_aux(r->meio, chave, &chave_aux);
 
         else
-            p_aux = inserir_aux(raiz->dir, chave, &chave_aux);
+            p_aux = inserir_aux(r->dir, chave, &chave_aux);
 
         if(p_aux == NULL)
             return NULL;
 
-        if(raiz->num_chaves == 1){
-            adiciona_chave(raiz, chave_aux, p_aux);
+        if(r->num_chaves == 1){
+            adiciona_chave(r, chave_aux, p_aux);
             return NULL;
         }
         else
-            return split(raiz, chave_aux, p_aux, chave_promovida);
+            return split(r, chave_aux, p_aux, chave_promovida);
     }
 }
 
@@ -130,19 +130,19 @@ arvore23 split(arvore23 p, int chave, arvore23 subarvore, int* chave_promovida)
 // Funcao para adicionar para adicionar chave
 // Pre-condicao: nenhuma
 // Pos-condicao: adiciona chave a esquerda ou a direita a depender do tamanho
-void adiciona_chave(arvore23 raiz, int chave, arvore23 p)
+void adiciona_chave(arvore23 r, int chave, arvore23 p)
 {
-    if(raiz->chave_esq < chave){
-        raiz->chave_dir = chave;
-        raiz->dir = p;
+    if(r->chave_esq < chave){
+        r->chave_dir = chave;
+        r->dir = p;
     }
     else{
-        raiz->chave_dir = raiz->chave_esq;
-        raiz->chave_esq = chave;
-        raiz->dir = raiz->meio;
-        raiz->meio = p;
+        r->chave_dir = r->chave_esq;
+        r->chave_esq = chave;
+        r->dir = r->meio;
+        r->meio = p;
     }
-    raiz->num_chaves = 2;
+    r->num_chaves = 2;
 }
 
 // Funcao que verifica se um no eh folha
@@ -172,93 +172,155 @@ arvore23 cria_no(int chave_esq, int chave_dir, arvore23 esq, arvore23 meio, arvo
 // Funcao para inserir elemento na arvore
 // Pre-condicao: arvore criada
 // Pos-condicao: insere elemento
-arvore23 inserir(arvore23 raiz, int chave)
+arvore23 inserir(arvore23 r, int chave)
 {
-    if(vazia(raiz))
+    if(vazia(r))
         return cria_no(chave, 0, NULL, NULL, NULL, 1);
 
     else{
         int chave_promovida;
-        arvore23 aux = inserir_aux(raiz, chave, &chave_promovida);
+        arvore23 aux = inserir_aux(r, chave, &chave_promovida);
 
         if(!vazia(aux))
-            return cria_no(chave_promovida, 0, raiz, aux, NULL, 1);
+            return cria_no(chave_promovida, 0, r, aux, NULL, 1);
 
         else
-            return raiz;
+            return r;
     }
 }
 
-arvore23 encontrar_sucessor(arvore23 raiz)
+// Funcao para encontrar o menor no
+// Pre-condicao: nenhuma
+// Pos-condicao: retorna menor no a partir do no buscado
+arvore23 encontrar_menor(arvore23 r)
 {
-    arvore23 x = raiz->meio;
+    if(vazia(r))
+        return NULL;
 
-    if(!eh_folha(x))
-        x = x->esq;
+    arvore23 aux = r;
 
-    return x;
+    while(aux->esq != NULL)
+        aux = aux->esq;
+
+    return aux;
 }
 
-arvore23 redistribuir(arvore23 pai, int pos_underflow)
+// Funcao para verificar e tratar underflow
+// Pre-condicao: removido o elemento
+// Pos-condicao: verifica e corrige o balanceamento da arvore
+arvore23 tratar_underflow(arvore23 pai, int pos_filho)
 {
-    if(pos_underflow == 0){
-        arvore23 irmao_rico = pai->meio;
+    if(pos_filho == 0)
+        return (pai->meio->num_chaves == 2) ? redistribuir(pai, 0) : merge(pai, 0);
 
-        pai->esq = cria_no(pai->chave_esq, 0, NULL, NULL, NULL, 1);
-        pai->chave_esq = irmao_rico->chave_esq;
+    if(pos_filho == 1){
+        if(pai->esq->num_chaves == 2)
+            return redistribuir(pai, 1);
 
-        irmao_rico->chave_esq = irmao_rico->chave_dir;
-        irmao_rico->chave_dir = 0;
-        irmao_rico->num_chaves--;
+        if(pai->dir != NULL && pai->dir->num_chaves == 2)
+            return redistribuir(pai, 1);
 
-        if(!eh_folha(irmao_rico)){
-            pai->esq->esq = irmao_rico->esq;
-            irmao_rico->esq = irmao_rico->meio;
-            irmao_rico->meio = irmao_rico->dir;
-            irmao_rico->dir = NULL;
+        return merge(pai, 1);
+    }
+    return (pai->meio->num_chaves == 2) ? redistribuir(pai, 2) : merge(pai, 2);
+}
+
+// Funcao para redistribuir chaves
+// Pre-condicao: remoção não ocasiona em merge e altera o balanceamento da arvore
+// Pos-condicao: retorna ponteiro pai apos redistribuição
+arvore23 redistribuir(arvore23 pai, int pos_filho)
+{
+    arvore23 esq = pai->esq;
+    arvore23 meio = pai->meio;
+    arvore23 dir = pai->dir;
+    arvore23 no_underflow = (pos_filho == 0) ? esq : ((pos_filho == 1) ? meio : dir);
+
+    if(pos_filho == 0){
+        no_underflow->chave_esq = pai->chave_esq;
+        pai->chave_esq = meio->chave_esq;
+        meio->chave_esq = meio->chave_dir;
+        meio->chave_dir = 0;
+        meio->num_chaves = 1;
+        no_underflow->num_chaves = 1;
+
+        if(!eh_folha(meio)){
+            no_underflow->meio = meio->esq;
+            meio->esq = meio->meio;
+            meio->meio = meio->dir;
+            meio->dir = NULL;
+        }
+    }
+    else if(pos_filho == 1){
+        if(esq->num_chaves == 2){
+            no_underflow->meio = no_underflow->esq;
+            no_underflow->chave_esq = pai->chave_esq;
+            pai->chave_esq = esq->chave_dir;
+            esq->chave_dir = 0; esq->num_chaves = 1;
+            no_underflow->num_chaves = 1;
+
+            if(!eh_folha(esq)){
+                no_underflow->esq = esq->dir;
+                esq->dir = NULL;
+            }
+        }
+        else{
+            no_underflow->chave_esq = pai->chave_dir;
+            pai->chave_dir = dir->chave_esq;
+            dir->chave_esq = dir->chave_dir;
+            dir->chave_dir = 0;
+            dir->num_chaves = 1;
+            no_underflow->num_chaves = 1;
+
+            if(!eh_folha(dir)){
+                no_underflow->meio = dir->esq;
+                dir->esq = dir->meio;
+                dir->meio = dir->dir;
+                dir->dir = NULL;
+            }
         }
     }
     else{
-        arvore23 irmao_rico = pai->esq;
+        no_underflow->meio = no_underflow->esq;
+        no_underflow->chave_esq = pai->chave_dir;
+        pai->chave_dir = meio->chave_dir;
+        meio->chave_dir = 0;
+        meio->num_chaves = 1;
+        no_underflow->num_chaves = 1;
 
-        pai->meio = cria_no(pai->chave_esq, 0, NULL, NULL, NULL, 1);
-
-        pai->chave_esq = irmao_rico->chave_dir;
-        irmao_rico->chave_dir = 0;
-        irmao_rico->num_chaves = 1;
-
-        if(!eh_folha(irmao_rico)){
-            pai->meio->esq = irmao_rico->dir;
-            irmao_rico->dir = NULL;
+        if(!eh_folha(meio)){
+            no_underflow->esq = meio->dir;
+            meio->dir = NULL;
         }
     }
-
     return pai;
 }
 
-arvore23 merge(arvore23 pai, int pos_underflow)
+// Funcao para juntar dois nos
+// Pre-condicao: elemento removido
+// Pos-condicao: retorna no pai concatenado com outra chave descendente
+arvore23 merge(arvore23 pai, int pos_filho)
 {
-    if(pos_underflow == 0){
-        arvore23 irmao = pai->meio;
+    if(pos_filho <= 1){
+        arvore23 esq = pai->esq;
+        arvore23 meio = pai->meio;
 
-        irmao->chave_dir = irmao->chave_esq;
-        irmao->chave_esq = pai->chave_esq;
-        irmao->num_chaves = 2;
+        if(pos_filho == 0){
+            esq->chave_esq = pai->chave_esq;
+            esq->chave_dir = meio->chave_esq;
 
-        pai->chave_esq = pai->chave_dir;
-        pai->chave_dir = pai->num_chaves = 0;
+            if(!eh_folha(meio))
+                esq->meio = meio->esq;
 
-        pai->esq = pai->meio;
-        pai->meio = pai->dir;
-        pai->dir = NULL;
+            esq->dir = meio->meio;
+        }
+        else{
+            esq->chave_dir = pai->chave_esq;
+            if(!eh_folha(meio))
+                esq->dir = meio->esq;
+        }
 
-        pai->num_chaves = 1;
-    }
-    else{
-        arvore23 irmao = pai->esq;
-
-        irmao->chave_dir = pai->chave_esq;
-        irmao->num_chaves = 2;
+        esq->num_chaves = 2;
+        free(meio);
 
         pai->chave_esq = pai->chave_dir;
         pai->chave_dir = 0;
@@ -266,155 +328,175 @@ arvore23 merge(arvore23 pai, int pos_underflow)
         pai->dir = NULL;
         pai->num_chaves--;
     }
+    else{
+        arvore23 meio = pai->meio;
+        arvore23 dir = pai->dir;
 
-    if(pai->num_chaves == 0){
-        arvore23 x = pai->esq;
-        free(pai);
-        return x;
+        meio->chave_dir = pai->chave_dir;
+        meio->num_chaves = 2;
+
+        if(!eh_folha(dir))
+            meio->dir = dir->esq;
+
+        free(dir);
+
+        pai->dir = NULL;
+        pai->chave_dir = 0;
+        pai->num_chaves--;
     }
-
     return pai;
 }
 
-arvore23 remover_aux(arvore23 raiz, int chave)
+// Funcao auxiliar para remover elemento
+// Pre-condicao: nenhuma
+// Pos-condicao: remove elemento e rebalanceia a arvore se necessario
+arvore23 remover_aux(arvore23 r, int chave)
 {
-    if(eh_folha(raiz)){
-        if(raiz->num_chaves == 2 && raiz->chave_dir == chave)
-            raiz->num_chaves = 1;
-
-        else if(raiz->chave_esq == chave){
-            raiz->chave_esq = raiz->chave_dir;
-            raiz->num_chaves = 1;
-        }
-
-        if(raiz->num_chaves == 0){
-            free(raiz);
-            raiz = NULL;
-        }
-        return raiz;
-    }
-
-    if(raiz->chave_esq == chave || (raiz->num_chaves == 2 && raiz->chave_dir == chave)){
-        arvore23 sucessor;
-        sucessor = encontrar_sucessor(raiz);
-        int chave_sucessor = sucessor->chave_esq;
-
-        if(raiz->chave_esq == chave)
-            raiz->chave_esq = chave;
-
-        else
-            raiz->chave_dir = chave;
-
-        chave = chave_sucessor;
-    }
-
-    if(chave < raiz->chave_esq){
-        raiz->esq = remover_aux(raiz->esq, chave);
-
-        if(raiz->esq == NULL){
-            if(raiz->meio->num_chaves > 1)
-                raiz = redistribuir(raiz, 0);
-
-            else
-                raiz = merge(raiz, 0);
-        }
-    }
-    else if(raiz->num_chaves == 1 || raiz->chave_dir > chave){
-        raiz->meio = remover_aux(raiz->meio, chave);
-
-        if(raiz->meio == NULL){
-            if(raiz->esq->num_chaves > 1)
-                raiz = redistribuir(raiz, 1);
-
-            else
-                raiz = merge(raiz, 1);
-        }
-    }
-
-    else{
-        raiz->dir = remover_aux(raiz->dir, chave);
-
-        if(raiz->dir == NULL){
-            if(raiz->meio->num_chaves > 1){
-                raiz = redistribuir(raiz, 2);
-            }
-
-            else{
-                raiz = merge(raiz, 2);
-            }
-        }
-    }
-
-    return raiz;
-}
-
-arvore23 remover(arvore23 raiz, int chave)
-{
-    if(vazia(raiz))
+    if(vazia(r))
         return NULL;
 
-    raiz = remover_aux(raiz, chave);
+    int pos_filho_underflow = -1;
 
-    if(raiz != NULL && raiz->num_chaves == 0){
-        arvore23 aux = raiz->esq;
-        free(raiz);
-        raiz = aux;
+    if(eh_folha(r)){
+        if(r->num_chaves == 2){
+            if(r->chave_dir == chave)
+                r->chave_dir = 0;
+
+            else if(r->chave_esq == chave){
+                r->chave_esq = r->chave_dir;
+                r->chave_dir = 0;
+            }
+
+            r->num_chaves = 1;
+        }
+        else
+            if(r->chave_esq == chave)
+                r->num_chaves = 0;
+
+        return r;
     }
 
-    return raiz;
+    if(r->chave_esq == chave || (r->num_chaves == 2 && r->chave_dir == chave)){
+        arvore23 sucessor;
+
+        if(r->chave_esq == chave){
+            sucessor = encontrar_menor(r->meio);
+            int chave_sucessor = sucessor->chave_esq;
+            r->chave_esq = chave_sucessor;
+            r->meio = remover_aux(r->meio, chave_sucessor);
+            pos_filho_underflow = 1;
+        }
+        else{
+            sucessor = encontrar_menor(r->dir);
+            int chave_sucessor = sucessor->chave_esq;
+            r->chave_dir = chave_sucessor;
+            r->dir = remover_aux(r->dir, chave_sucessor);
+            pos_filho_underflow = 2;
+        }
+    }
+    else{
+        if(chave < r->chave_esq){
+            r->esq = remover_aux(r->esq, chave);
+            pos_filho_underflow = 0;
+        }
+        else if(r->num_chaves == 1 || chave < r->chave_dir){
+            r->meio = remover_aux(r->meio, chave);
+            pos_filho_underflow = 1;
+        }
+        else{
+            r->dir = remover_aux(r->dir, chave);
+            pos_filho_underflow = 2;
+        }
+    }
+
+    if(pos_filho_underflow != -1){
+        arvore23 filho;
+
+        if(pos_filho_underflow == 0)
+            filho = r->esq;
+
+        else if(pos_filho_underflow == 1)
+            filho = r->meio;
+
+        else
+            filho = r->dir;
+
+        if(filho != NULL && filho->num_chaves == 0)
+            r = tratar_underflow(r, pos_filho_underflow);
+    }
+
+    return r;
+}
+
+// Funcao para remover elemento
+// Pre-condicao: arvore criada
+// Pos-condicao: nenhuma
+arvore23 remover(arvore23 r, int chave)
+{
+    if(busca(r, chave) == NULL)
+        return r;
+
+    r = remover_aux(r, chave);
+
+    if(r != NULL && r->num_chaves == 0){
+        arvore23 nova_raiz = r->esq;
+        free(r);
+        return nova_raiz;
+    }
+    return r;
 }
 
 // Funcao para imprimir arvore23
 // Pre-condicao: nenhuma
 // Pos-condicao: imprime arvore ordenada na tela
-void inOrdem(arvore23 raiz)
+void inOrdem(arvore23 r)
 {
-    if(vazia(raiz))
+    if(vazia(r))
         return;
 
-    inOrdem(raiz->esq);
-    printf("%d\n", raiz->chave_esq);
-    inOrdem(raiz->meio);
-    if(raiz->num_chaves == 2)
-        printf("%d\n", raiz->chave_dir);
+    inOrdem(r->esq);
+    printf("%d\n", r->chave_esq);
+    inOrdem(r->meio);
+    if(r->num_chaves == 2)
+        printf("%d\n", r->chave_dir);
 
-    if(raiz->num_chaves == 2)
-        inOrdem(raiz->dir);
+    if(r->num_chaves == 2)
+        inOrdem(r->dir);
 }
 
 // Funcao para imprimir arvore23
 // Pre-condicao: nenhuma
 // Pos-condicao: imprime arvore preOrdenada na tela
-void preOrdem(arvore23 raiz)
+void preOrdem(arvore23 r)
 {
-    if(vazia(raiz))
+    if(vazia(r))
         return;
 
-    printf("%d - ", raiz->chave_esq);
+    printf("%d - ", r->chave_esq);
 
-    if(raiz->num_chaves == 2)
-        printf("%d\n", raiz->chave_dir);
+    if(r->num_chaves == 2)
+        printf("%d\n", r->chave_dir);
 
-    preOrdem(raiz->esq);
-    preOrdem(raiz->meio);
+    preOrdem(r->esq);
+    preOrdem(r->meio);
 
-    if(raiz->num_chaves == 2)
-        preOrdem(raiz->dir);
+    if(r->num_chaves == 2)
+        preOrdem(r->dir);
 }
 
 // Funcao de imprimir arvore
 // Pre-condicao: nenhuma
 // Pos-condicao: imprime por niveis
-void imprimir_niveis(arvore23 raiz)
+void imprimir_niveis(arvore23 r)
 {
-    if(vazia(raiz))
+    if(vazia(r))
         return;
 
     int inicio, fim, i;
     arvore23* fila = malloc(1000 * sizeof(arvore23));
 
     inicio = fim = 0;
-    fila[fim++] = raiz;
+    fila[fim++] = r;
 
     while(inicio < fim){
         int nivel = fim - inicio;
