@@ -2,6 +2,9 @@
 #include "../include/arvore23.h"
 #include "../include/fila.h"
 
+// Funcao para ler cabecalho
+// Pre-condicao: arvore criada
+// Pos-condicao: retorna cabecalho
 cabecalho* ler_cabecalho(FILE* f)
 {
     cabecalho* cab = malloc(sizeof(cabecalho));
@@ -12,12 +15,18 @@ cabecalho* ler_cabecalho(FILE* f)
     return cab;
 }
 
+// Funcao para escrever cabecalho
+// Pre-condicao: arvore criada
+// Pos-condicao: nenhuma
 void escrever_cabecalho(FILE* f, cabecalho* cab)
 {
     fseek(f, 0, SEEK_SET);
     fwrite(cab, sizeof(cabecalho), 1, f);
 }
 
+// Funcao para ler no
+// Pre-condicao: arvore criada
+// Pos-condicao: retorna no buscado
 no23* ler_no(FILE* f, int pos)
 {
     no23* r = malloc(sizeof(no23));
@@ -28,12 +37,18 @@ no23* ler_no(FILE* f, int pos)
     return r;
 }
 
+// Funcao para escrever no
+// Pre-condicao: arvore criada
+// Pos-condicao: nenhuma
 void escrever_no(FILE* f, no23* r, int pos)
 {
     fseek(f, sizeof(cabecalho) + sizeof(no23) * pos, SEEK_SET);
     fwrite(r, sizeof(no23), 1, f);
 }
 
+// Funcao para criar arvore23
+// Pre-condicao: nenhuma
+// Pos-condicao: inicializa cabecalho
 void inicializar(FILE* f)
 {
     cabecalho* cab = malloc(sizeof(cabecalho));
@@ -46,6 +61,9 @@ void inicializar(FILE* f)
     free(cab);
 }
 
+// Funcao para verificar se uma arvore eh vazia
+// Pre-condicao: arvore criada
+// Pos-condicao: retorna verdadeiro se vazia
 boolean vazia(int pos)
 {
     if(pos == -1)
@@ -54,6 +72,9 @@ boolean vazia(int pos)
     return false;
 }
 
+// Funcao para testar se um no eh folha
+// Pre-condicao: arvore criada
+// Pos-condicao: retorna verdadeiro se folha
 boolean eh_folha(FILE* f, int pos)
 {
     no23* r = ler_no(f, pos);
@@ -67,6 +88,9 @@ boolean eh_folha(FILE* f, int pos)
     return false;
 }
 
+// Funcao para buscar na arvore
+// Pre-condicao: arvore criada
+// Pos-condicao: retorna o indice do no buscado
 int busca(FILE* f, int chave, int pos)
 {
     if(vazia(pos))
@@ -91,6 +115,29 @@ int busca(FILE* f, int chave, int pos)
         return busca(f, chave, ler_no(f, pos)->dir);
 }
 
+// Funcao para obter posicao livre
+// Pre-condicao: nenhuma
+// Pos-condicao: retorna nova posicao ou posicao reaproveitada
+int obter_pos_livre(FILE* f, cabecalho* cab)
+{
+    int pos_livre;
+
+    if(cab->pos_livre != -1){
+        pos_livre = cab->pos_livre;
+        no23* livre = ler_no(f, pos_livre);
+
+        cab->pos_livre = livre->esq;
+        free(livre);
+    }
+    else
+        pos_livre = cab->pos_topo++;
+
+    return pos_livre;
+}
+
+// Funcao auxiliar para inserir em 23
+// Pre-condicao: nenhuma
+// Pos-condicao: insere elemento
 int inserir_aux(FILE* f, int pos, int chave, int* chave_promovida, cabecalho* cab)
 {
     no23* r = ler_no(f, pos);
@@ -136,23 +183,9 @@ int inserir_aux(FILE* f, int pos, int chave, int* chave_promovida, cabecalho* ca
     }
 }
 
-int obter_pos_livre(FILE* f, cabecalho* cab)
-{
-    int pos_livre;
-
-    if(cab->pos_livre != -1){
-        pos_livre = cab->pos_livre;
-        no23* livre = ler_no(f, pos_livre);
-
-        cab->pos_livre = livre->esq;
-        free(livre);
-    }
-    else
-        pos_livre = cab->pos_topo++;
-
-    return pos_livre;
-}
-
+// Funcao para aplicar split em determinado no
+// Pre-condicao: elemento na espera de ser inserido
+// Pos-condicao: separa um no em dois
 int split(FILE* f, int pos, int chave, int pos_subarvore, int* chave_promovida, cabecalho* cab)
 {
     int p_aux;
@@ -197,6 +230,9 @@ int split(FILE* f, int pos, int chave, int pos_subarvore, int* chave_promovida, 
     }
 }
 
+// Funcao para adicionar para adicionar chave
+// Pre-condicao: nenhuma
+// Pos-condicao: adiciona chave a esquerda ou a direita a depender do tamanho
 void adiciona_chave(FILE* f, int pos, int chave, int pos_aux)
 {
     no23* r = ler_no(f, pos);
@@ -217,6 +253,9 @@ void adiciona_chave(FILE* f, int pos, int chave, int pos_aux)
     free(r);
 }
 
+// Funcao auxiliar para criar no23
+// Pre-condicao: nenhuma
+// Pos-condicao: retorna novo no
 int cria_no(FILE* f, cabecalho* cab, int chave_esq, int chave_dir, int esq, int meio, int dir, int num_chaves)
 {
     int nova_pos = obter_pos_livre(f, cab);
@@ -235,6 +274,9 @@ int cria_no(FILE* f, cabecalho* cab, int chave_esq, int chave_dir, int esq, int 
     return nova_pos;
 }
 
+// Funcao para inserir elemento na arvore
+// Pre-condicao: nenhuma
+// Pos-condicao: insere elemento
 int inserir_chave(FILE* f, int chave, cabecalho* cab, int pos)
 {
     if(vazia(pos))
@@ -253,6 +295,9 @@ int inserir_chave(FILE* f, int chave, cabecalho* cab, int pos)
     }
 }
 
+// Funcao para inserir elemento na arvore
+// Pre-condicao: arvore criada
+// Pos-condicao: nenhuma
 void inserir(FILE* f, int chave)
 {
     cabecalho* cab = ler_cabecalho(f);
@@ -263,6 +308,9 @@ void inserir(FILE* f, int chave)
     free(cab);
 }
 
+// Funcao para liberar posicao
+// Pre-condicao: nenhuma
+// Pos-condicao: nenhuma
 void liberar_pos(FILE* f, cabecalho* cab, int pos_livre)
 {
     if(pos_livre == -1)
@@ -277,6 +325,9 @@ void liberar_pos(FILE* f, cabecalho* cab, int pos_livre)
     free(no_livre);
 }
 
+// Funcao para encontrar o menor no
+// Pre-condicao: nenhuma
+// Pos-condicao: retorna menor no a partir do no buscado
 int encontrar_menor(FILE* f, int pos)
 {
     if(vazia(pos))
@@ -295,6 +346,9 @@ int encontrar_menor(FILE* f, int pos)
     return pos_esq;
 }
 
+// Funcao para verificar e tratar underflow
+// Pre-condicao: removido o elemento
+// Pos-condicao: verifica e corrige o balanceamento da arvore
 int tratar_underflow(FILE* f, cabecalho* cab, int pos, int pos_filho)
 {
     no23* pai = ler_no(f, pos);
@@ -349,6 +403,9 @@ int tratar_underflow(FILE* f, cabecalho* cab, int pos, int pos_filho)
     }
 }
 
+// Funcao para redistribuir chaves
+// Pre-condicao: remoção não ocasiona em merge e altera o balanceamento da arvore
+// Pos-condicao: retorna ponteiro pai apos redistribuição
 int redistribuir(FILE* f, int pos, int pos_filho)
 {
     no23* pai = ler_no(f, pos);
@@ -436,6 +493,9 @@ int redistribuir(FILE* f, int pos, int pos_filho)
     return pos;
 }
 
+// Funcao para juntar dois nos
+// Pre-condicao: elemento removido
+// Pos-condicao: retorna no pai concatenado com outra chave descendente
 int merge(FILE* f, cabecalho* cab, int pos, int pos_filho)
 {
     no23* pai = ler_no(f, pos);
@@ -464,7 +524,9 @@ int merge(FILE* f, cabecalho* cab, int pos, int pos_filho)
         esq->num_chaves = 2;
         escrever_no(f, esq, pai->esq);
 
+        free(esq);
         free(meio);
+
         liberar_pos(f, cab, pai->meio);
         pai->meio = -1;
 
@@ -487,7 +549,9 @@ int merge(FILE* f, cabecalho* cab, int pos, int pos_filho)
 
         escrever_no(f, meio, pai->meio);
 
+        free(meio);
         free(dir);
+
         liberar_pos(f, cab, pai->dir);
         pai->dir = -1;
 
@@ -501,6 +565,9 @@ int merge(FILE* f, cabecalho* cab, int pos, int pos_filho)
     return pos;
 }
 
+// Funcao auxiliar para remover elemento
+// Pre-condicao: nenhuma
+// Pos-condicao: remove elemento e rebalanceia a arvore se necessario
 int remover_aux(FILE* f, int chave, int pos, cabecalho* cab)
 {
     if(vazia(pos))
@@ -600,6 +667,9 @@ int remover_aux(FILE* f, int chave, int pos, cabecalho* cab)
     return pos;
 }
 
+// Funcao para remover elemento
+// Pre-condicao: arvore criada
+// Pos-condicao: nenhuma
 void remover(FILE* f, int chave)
 {
     cabecalho* cab = ler_cabecalho(f);
@@ -616,13 +686,33 @@ void remover(FILE* f, int chave)
         int pos_esq = r->esq;
 
         liberar_pos(f, cab, cab->pos_raiz);
-
         cab->pos_raiz = pos_esq;
     }
     escrever_cabecalho(f, cab);
     free(cab);
 }
 
+// Funcao para verificar posicoes livres
+// Pre-condicao: arvore criada
+// Pos-condicao: nenhuma
+void imprimir_livres(FILE* f)
+{
+    cabecalho* cab = ler_cabecalho(f);
+    int pos_livre = cab->pos_livre;
+    free(cab);
+
+    while(pos_livre != -1){
+        printf("Posicao: %d\n", pos_livre);
+
+        no23* aux = ler_no(f, pos_livre);
+        pos_livre = aux->esq;
+        free(aux);
+    }
+}
+
+// Funcao de imprimir arvore
+// Pre-condicao: nenhuma
+// Pos-condicao: imprime por niveis
 void imprimir_niveis(FILE* f)
 {
     cabecalho* cab = ler_cabecalho(f);
@@ -634,7 +724,6 @@ void imprimir_niveis(FILE* f)
 
     Fila fila = criar_fila();
     no23* r = ler_no(f, pos);
-
     no23* aux[10000];
     int j = 0;
 
