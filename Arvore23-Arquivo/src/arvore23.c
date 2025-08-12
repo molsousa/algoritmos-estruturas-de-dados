@@ -81,7 +81,7 @@ int busca(FILE* f, int chave, int pos)
     if(chave < ler_no(f, pos)->chave_esq)
         return busca(f, chave, ler_no(f, pos)->esq);
 
-    else if(ler_no(f, pos)->num_chaves == -1)
+    else if(ler_no(f, pos)->num_chaves == 1)
         return busca(f, chave, ler_no(f, pos)->meio);
 
     else if(chave < ler_no(f, pos)->chave_dir)
@@ -246,6 +246,61 @@ void inserir(FILE* f, int chave)
     free(cab);
 }
 
+void liberar_pos(FILE* f, cabecalho* cab, int pos_livre)
+{
+    if(pos_livre == -1)
+        return;
+
+    no23* no_livre = ler_no(f, pos_livre);
+
+    no_livre->esq = no_livre->meio = no_livre->dir = cab->pos_livre;
+    cab->pos_livre = pos_livre;
+
+    escrever_no(f, no_livre, pos_livre);
+    free(no_livre);
+}
+
+int encontrar_menor(FILE* f, int pos)
+{
+    if(vazia(pos))
+        return -1;
+
+    no23* aux = ler_no(f, pos);
+    int pos_esq = pos;
+
+    while(aux->esq != -1){
+        pos_esq = aux->esq;
+        free(aux);
+        aux = ler_no(f, pos_esq);
+    }
+    free(aux);
+
+    return pos_esq;
+}
+
+void remover(FILE* f, int chave)
+{
+    cabecalho* cab = ler_cabecalho(f);
+
+    if(busca(f, chave, cab->pos_raiz) == -1){
+        free(cab);
+        return;
+    }
+
+    cab->pos_raiz = remover_aux(f, chave, cab->pos_raiz, cab);
+
+    if(cab->pos_raiz != -1 && ler_no(f, cab->pos_raiz)->num_chaves == 0){
+        no23* r = ler_no(f, cab->pos_raiz);
+        int pos_esq = r->esq;
+
+        liberar_pos(f, cab, cab->pos_raiz);
+
+        cab->pos_raiz = pos_esq;
+    }
+    escrever_cabecalho(f, cab);
+    free(cab);
+}
+
 void imprimir_niveis(FILE* f)
 {
     cabecalho* cab = ler_cabecalho(f);
@@ -279,10 +334,10 @@ void imprimir_niveis(FILE* f)
             printf("[%d", atual->chave_esq);
 
             if(atual->num_chaves == 2)
-                printf(", %d] ", atual->chave_dir);
+                printf(",%d] ", atual->chave_dir);
 
             else
-                printf("] ");
+                printf(",-] ");
 
             if(atual->esq != -1){
                 r = ler_no(f, atual->esq);

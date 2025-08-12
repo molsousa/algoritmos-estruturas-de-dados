@@ -48,6 +48,20 @@ int inserir_chave(FILE*, int, cabecalho*, int);
 
 void inserir(FILE*, int);
 
+void liberar_pos(FILE*, cabecalho*, int);
+
+int encontrar_menor(FILE*, int);
+
+int tratar_underflow(FILE*, cabecalho*, int, int);
+
+int redistribuir(FILE*, int, int);
+
+int merge(FILE*, cabecalho*, int, int);
+
+int remover_aux(FILE*, int, int, cabecalho*);
+
+void remover(FILE*, int);
+
 void imprimir_niveis(FILE*);
 
 #endif // ARVORE_23_H_INCLUDED
