@@ -136,6 +136,23 @@ int inserir_aux(FILE* f, int pos, int chave, int* chave_promovida, cabecalho* ca
     }
 }
 
+int obter_pos_livre(FILE* f, cabecalho* cab)
+{
+    int pos_livre;
+
+    if(cab->pos_livre != -1){
+        pos_livre = cab->pos_livre;
+        no23* livre = ler_no(f, pos_livre);
+
+        cab->pos_livre = livre->esq;
+        free(livre);
+    }
+    else
+        pos_livre = cab->pos_topo++;
+
+    return pos_livre;
+}
+
 int split(FILE* f, int pos, int chave, int pos_subarvore, int* chave_promovida, cabecalho* cab)
 {
     int p_aux;
@@ -202,7 +219,7 @@ void adiciona_chave(FILE* f, int pos, int chave, int pos_aux)
 
 int cria_no(FILE* f, cabecalho* cab, int chave_esq, int chave_dir, int esq, int meio, int dir, int num_chaves)
 {
-    int nova_pos = cab->pos_topo++;
+    int nova_pos = obter_pos_livre(f, cab);
 
     no23 novo;
 
@@ -276,6 +293,311 @@ int encontrar_menor(FILE* f, int pos)
     free(aux);
 
     return pos_esq;
+}
+
+int tratar_underflow(FILE* f, cabecalho* cab, int pos, int pos_filho)
+{
+    no23* pai = ler_no(f, pos);
+
+    if(pos_filho == 0){
+        no23* meio = ler_no(f, pai->meio);
+        if(meio->num_chaves == 2){
+            free(meio);
+            free(pai);
+            return redistribuir(f, pos, 0);
+        }
+        else{
+            free(meio);
+            free(pai);
+            return merge(f, cab, pos, 0);
+        }
+    }
+    else if(pos_filho == 1){
+        no23* esq = ler_no(f, pai->esq);
+        if(esq->num_chaves == 2){
+            free(esq);
+            free(pai);
+            return redistribuir(f, pos, 1);
+        }
+        free(esq);
+
+        if(pai->dir != -1){
+            no23* dir = ler_no(f, pai->dir);
+            if(dir->num_chaves == 2){
+                free(dir);
+                free(pai);
+
+                return redistribuir(f, pos, 1);
+            }
+        }
+        free(pai);
+        return merge(f, cab, pos, 1);
+    }
+    else{
+        no23* meio = ler_no(f, pai->meio);
+
+        if(meio->num_chaves == 2){
+            free(meio);
+            free(pai);
+            return redistribuir(f, pos, 2);
+        }
+        else{
+            free(meio);
+            free(pai);
+            return merge(f, cab, pos, 2);
+        }
+    }
+}
+
+int redistribuir(FILE* f, int pos, int pos_filho)
+{
+    no23* pai = ler_no(f, pos);
+
+    no23* esq = ler_no(f, pai->esq);
+    no23* meio = ler_no(f, pai->meio);
+    no23* dir = ler_no(f, pai->dir);
+    no23* no_underflow = (pos_filho == 0) ? esq : ((pos_filho == 1) ? meio : dir);
+
+    if(pos_filho == 0){
+        no_underflow->chave_esq = pai->chave_esq;
+        pai->chave_esq = meio->chave_esq;
+        meio->chave_esq = meio->chave_dir;
+        meio->chave_dir = 0;
+        meio->num_chaves = 1;
+        no_underflow->num_chaves = 1;
+
+        if(!eh_folha(f, pai->meio)){
+            no_underflow->meio = meio->esq;
+            meio->esq = meio->meio;
+            meio->meio = meio->dir;
+            meio->dir = -1;
+        }
+
+        escrever_no(f, no_underflow, pai->esq);
+        escrever_no(f, meio, pai->meio);
+    }
+    else if(pos_filho == 1){
+        if(esq->num_chaves == 2){
+            no_underflow->meio = no_underflow->esq;
+            no_underflow->chave_esq = pai->chave_esq;
+            pai->chave_esq = esq->chave_dir;
+            esq->chave_dir = 0; esq->num_chaves = 1;
+            no_underflow->num_chaves = 1;
+
+            if(!eh_folha(f, pai->esq)){
+                no_underflow->esq = esq->dir;
+                esq->dir = -1;
+            }
+
+            escrever_no(f, no_underflow, pai->meio);
+            escrever_no(f, esq, pai->esq);
+        }
+        else{
+            no_underflow->chave_esq = pai->chave_dir;
+            pai->chave_dir = dir->chave_esq;
+            dir->chave_esq = dir->chave_dir;
+            dir->chave_dir = 0;
+            dir->num_chaves = 1;
+
+            if(!eh_folha(f, pai->dir)){
+                no_underflow->meio = dir->esq;
+                dir->esq = dir->meio;
+                dir->meio = dir->dir;
+                dir->dir = -1;
+            }
+
+            escrever_no(f, no_underflow, pai->meio);
+            escrever_no(f, dir, pai->dir);
+        }
+    }
+    else{
+        no_underflow->meio = no_underflow->esq;
+        no_underflow->chave_esq = pai->chave_dir;
+        pai->chave_dir = meio->chave_dir;
+        meio->chave_dir = 0;
+        meio->num_chaves = 1;
+        no_underflow->num_chaves = 1;
+
+        if(!eh_folha(f, pai->meio)){
+            no_underflow->esq = meio->dir;
+            meio->dir = -1;
+        }
+
+        escrever_no(f, no_underflow, pai->dir);
+        escrever_no(f, meio, pai->meio);
+    }
+    escrever_no(f, pai, pos);
+
+    free(pai);
+    free(esq);
+    free(meio);
+    free(dir);
+
+    return pos;
+}
+
+int merge(FILE* f, cabecalho* cab, int pos, int pos_filho)
+{
+    no23* pai = ler_no(f, pos);
+
+    if(pos_filho <= 1){
+        no23* esq = ler_no(f, pai->esq);
+        no23* meio = ler_no(f, pai->meio);
+
+        if(pos_filho == 0){
+            esq->chave_esq = pai->chave_esq;
+            esq->chave_dir = meio->chave_esq;
+
+            if(!eh_folha(f, pai->meio))
+                esq->meio = meio->esq;
+
+            esq->dir = meio->meio;
+
+        }
+        else{
+            esq->chave_dir = pai->chave_esq;
+
+            if(!eh_folha(f, pai->meio))
+                esq->dir = meio->esq;
+        }
+
+        esq->num_chaves = 2;
+        escrever_no(f, esq, pai->esq);
+
+        free(meio);
+        liberar_pos(f, cab, pai->meio);
+        pai->meio = -1;
+
+        pai->chave_esq = pai->chave_dir;
+        pai->chave_dir = 0;
+        pai->meio = pai->dir;
+        pai->dir = -1;
+        pai->num_chaves--;
+        escrever_no(f, pai, pos);
+    }
+    else{
+        no23* meio = ler_no(f, pai->meio);
+        no23* dir = ler_no(f, pai->dir);
+
+        meio->chave_dir = pai->chave_dir;
+        meio->num_chaves = 2;
+
+        if(!eh_folha(f, pai->dir))
+            meio->dir = dir->esq;
+
+        escrever_no(f, meio, pai->meio);
+
+        free(dir);
+        liberar_pos(f, cab, pai->dir);
+        pai->dir = -1;
+
+        pai->chave_dir = 0;
+        pai->num_chaves--;
+        escrever_no(f, pai, pos);
+    }
+
+    free(pai);
+
+    return pos;
+}
+
+int remover_aux(FILE* f, int chave, int pos, cabecalho* cab)
+{
+    if(vazia(pos))
+        return -1;
+
+    int pos_filho = -1;
+    no23* r = ler_no(f, pos);
+
+    if(eh_folha(f, pos)){
+        if(r->num_chaves == 2){
+            if(r->chave_dir == chave)
+                r->chave_dir = 0;
+
+            else if(r->chave_esq == chave){
+                r->chave_esq = r->chave_dir;
+                r->chave_dir = 0;
+            }
+            r->num_chaves = 1;
+
+        }
+        else
+            if(r->chave_esq == chave)
+                r->num_chaves = 0;
+
+        escrever_no(f, r, pos);
+        free(r);
+
+        return pos;
+    }
+
+    if(r->chave_esq == chave || (r->num_chaves == 2 && r->chave_dir == chave)){
+        int pos_sucessor;
+
+        if(r->chave_esq == chave){
+            pos_sucessor = encontrar_menor(f, r->meio);
+            no23* sucessor = ler_no(f, pos_sucessor);
+            int chave_sucessor = sucessor->chave_esq;
+            free(sucessor);
+            r->chave_esq = chave_sucessor;
+            r->meio = remover_aux(f, chave_sucessor, r->meio, cab);
+            escrever_no(f, r, pos);
+            pos_filho = 1;
+        }
+        else{
+            pos_sucessor = encontrar_menor(f, r->dir);
+            no23* sucessor = ler_no(f, pos_sucessor);
+            int chave_sucessor = sucessor->chave_esq;
+            free(sucessor);
+            r->chave_dir = chave_sucessor;
+            r->dir = remover_aux(f, chave_sucessor, r->dir, cab);
+            escrever_no(f, r, pos);
+            pos_filho = 2;
+        }
+    }
+    else{
+        if(chave < r->chave_esq){
+            r->esq = remover_aux(f, chave, r->esq, cab);
+            escrever_no(f, r, pos);
+            pos_filho = 0;
+            free(r);
+        }
+        else if(r->num_chaves == 1 || chave < r->chave_dir){
+            r->meio = remover_aux(f, chave, r->meio, cab);
+            escrever_no(f, r, pos);
+            pos_filho = 1;
+            free(r);
+        }
+        else{
+            r->dir = remover_aux(f, chave, r->dir, cab);
+            escrever_no(f, r, pos);
+            pos_filho = 2;
+            free(r);
+        }
+    }
+    r = ler_no(f, pos);
+
+    if(pos_filho != -1){
+        no23* filho = NULL;
+
+        if(pos_filho == 0 && r->esq != -1)
+            filho = ler_no(f, r->esq);
+
+        else if(pos_filho == 1 && r->meio != -1)
+            filho = ler_no(f, r->meio);
+
+        else if(r->dir != -1)
+            filho = ler_no(f, r->dir);
+
+        if(filho != NULL && filho->num_chaves == 0)
+            pos = tratar_underflow(f, cab, pos, pos_filho);
+
+        if(filho != NULL)
+            free(filho);
+
+        free(r);
+    }
+    return pos;
 }
 
 void remover(FILE* f, int chave)

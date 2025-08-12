@@ -2,26 +2,20 @@
 
 int main()
 {
-    arvore23 raiz = criar_arvore();
+    arvore23 r = criar_arvore();
 
-    raiz = inserir(raiz, 6);
-    raiz = inserir(raiz, 15);
-    raiz = inserir(raiz, 21);
-    raiz = inserir(raiz, 4);
-    raiz = inserir(raiz, 9);
-    raiz = inserir(raiz, 50);
-    raiz = inserir(raiz, 34);
-    raiz = inserir(raiz, 23);
-    raiz = inserir(raiz, 13);
-    raiz = inserir(raiz, 7);
-    raiz = inserir(raiz, 11);
+    r = inserir(r, 4);
+    r = inserir(r, 6);
+    r = inserir(r, 15);
+    r = inserir(r, 11);
+    r = inserir(r, 9);
+    r = inserir(r, 50);
+    r = inserir(r, 21);
+    r = inserir(r, 34);
 
-    raiz = remover(raiz, 50);
-    raiz = remover(raiz, 34);
-    raiz = remover(raiz, 15);
-    raiz = remover(raiz, 6);
+    r = remover(r, 4);
 
-    imprimir_niveis(raiz);
+    imprimir_niveis(r);
 
     return 0;
 }

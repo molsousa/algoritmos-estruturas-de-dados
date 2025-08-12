@@ -36,6 +36,8 @@ boolean eh_folha(FILE*, int);
 
 int busca(FILE*, int, int);
 
+int obter_pos_livre(FILE*, cabecalho*);
+
 int inserir_aux(FILE*, int, int, int*, cabecalho*);
 
 int split(FILE*, int, int, int, int*, cabecalho*);
