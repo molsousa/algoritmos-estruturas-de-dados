@@ -1,6 +1,5 @@
 #include <stdlib.h>
 #include "../include/arvore23.h"
-#include "../include/fila.h"
 
 // Funcao para ler cabecalho
 // Pre-condicao: arvore criada
@@ -349,7 +348,7 @@ int encontrar_menor(FILE* f, int pos)
 // Funcao para verificar e tratar underflow
 // Pre-condicao: removido o elemento
 // Pos-condicao: verifica e corrige o balanceamento da arvore
-int tratar_underflow(FILE* f, cabecalho* cab, int pos, int pos_filho)
+int corrigir_balanceamento(FILE* f, cabecalho* cab, int pos, int pos_filho)
 {
     no23* pai = ler_no(f, pos);
 
@@ -657,7 +656,7 @@ int remover_aux(FILE* f, int chave, int pos, cabecalho* cab)
             filho = ler_no(f, r->dir);
 
         if(filho != NULL && filho->num_chaves == 0)
-            pos = tratar_underflow(f, cab, pos, pos_filho);
+            pos = corrigir_balanceamento(f, cab, pos, pos_filho);
 
         if(filho != NULL)
             free(filho);
@@ -713,63 +712,52 @@ void imprimir_livres(FILE* f)
 // Funcao de imprimir arvore
 // Pre-condicao: nenhuma
 // Pos-condicao: imprime por niveis
-void imprimir_niveis(FILE* f)
+void imprimir_por_niveis(FILE* f)
 {
     cabecalho* cab = ler_cabecalho(f);
     int pos = cab->pos_raiz;
     free(cab);
 
-    if(vazia(pos))
+    if(pos == -1)
         return;
 
-    Fila fila = criar_fila();
-    no23* r = ler_no(f, pos);
+    int inicio, fim, i, cont;
     no23* aux[10000];
-    int j = 0;
 
-    enqueue(fila, r);
-    enqueue(fila, NULL);
-    aux[j++] = r;
+    inicio = fim = 0;
 
-    while(!fila_vazia(fila)){
-        no23* atual = dequeue(fila);
+    aux[fim++] = ler_no(f, pos);
 
-        if(atual == NULL){
-            printf("\n");
+    while(fim > inicio){
 
-            if(!fila_vazia(fila))
-                enqueue(fila, NULL);
-        }
+        cont = fim - inicio;
 
-        else{
-            printf("[%d", atual->chave_esq);
+        for(i = 0; i < cont; i++){
+            no23* atual = aux[inicio];
 
+            printf("[%d,", atual->chave_esq);
             if(atual->num_chaves == 2)
-                printf(",%d] ", atual->chave_dir);
+                printf("%d]", atual->chave_dir);
 
             else
-                printf(",-] ");
+                printf("-]");
 
-            if(atual->esq != -1){
-                r = ler_no(f, atual->esq);
-                enqueue(fila, r);
-                aux[j++] = r;
-            }
+            if(atual->esq != -1)
+                aux[fim++] = ler_no(f, atual->esq);
 
-            if(atual->meio != -1){
-                r = ler_no(f, atual->meio);
-                enqueue(fila, r);
-                aux[j++] = r;
-            }
 
-            if(atual->dir != -1){
-                r = ler_no(f, atual->dir);
-                enqueue(fila, r);
-                aux[j++] = r;
-            }
+            if(atual->meio != -1)
+                aux[fim++] = ler_no(f, atual->meio);
+
+
+            if(atual->dir != -1)
+                aux[fim++] = ler_no(f, atual->dir);
+
+            inicio++;
         }
+        printf("\n");
     }
 
-    while(j >= 0)
-        free(aux[--j]);
+    while(fim >= 0)
+        free(aux[--fim]);
 }

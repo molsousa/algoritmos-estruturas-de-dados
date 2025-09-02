@@ -126,11 +126,11 @@ void liberar_pos(FILE*, cabecalho*, int);
 // Entrada: arquivo de indice, posicao do no raiz
 int encontrar_menor(FILE*, int);
 
-// Funcao para verificar e tratar underflow
+// Funcao para verificar e corrigir balanceamento
 // Pre-condicao: removido o elemento
 // Pos-condicao: verifica e corrige o balanceamento da arvore
 // Entrada: arquivo de indice, cabecalho, posicao do no pai, situacao do no underflow
-int tratar_underflow(FILE*, cabecalho*, int, int);
+int corrigir_balanceamento(FILE*, cabecalho*, int, int);
 
 // Funcao para redistribuir chaves
 // Pre-condicao: remoção não ocasiona em merge e altera o balanceamento da arvore
@@ -165,7 +165,6 @@ void imprimir_livres(FILE*);
 // Funcao de imprimir arvore
 // Pre-condicao: nenhuma
 // Pos-condicao: imprime por niveis
-// Entrada: arquivo de indice
-void imprimir_niveis(FILE*);
+void imprimir_por_niveis(FILE*);
 
 #endif // ARVORE_23_H_INCLUDED

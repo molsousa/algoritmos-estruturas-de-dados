@@ -1,7 +1,7 @@
 #include "include/arvore23.h"
 
 int main()
-{\
+{
     FILE* f = fopen("arvore-23.bin", "w+b");
 
     inicializar(f);
@@ -41,10 +41,14 @@ int main()
     inserir(f, 67);
     inserir(f, 30);
     inserir(f, 35);
+    inserir(f, 62);
+
+    remover(f, 23);
+    remover(f, 8);
 
     imprimir_livres(f);
 
-    imprimir_niveis(f);
+    imprimir_por_niveis(f);
 
     return 0;
 }
