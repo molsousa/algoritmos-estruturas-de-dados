@@ -1,5 +1,4 @@
 #include <stdlib.h>
-#include "../include/fila.h"
 #include "../include/arvoreb.h"
 
 // Funcao para escrever no cabecalho
@@ -610,53 +609,39 @@ void imprimir_niveis(FILE* f)
     if(pos == -1)
         return;
 
-    Fila fila = criar_fila();
-    noB* x = ler_no(f, pos);
-    noB* aux[1000];
-    int j = 0;
+    noB* aux[10000];
+    int inicio, fim, i, j, cont;
 
-    enqueue(fila, x);
-    enqueue(fila, NULL);
+    inicio = fim = 0;
+    aux[fim++] = ler_no(f, pos);
 
-    aux[j++] = x;
+    while(fim > inicio){
+        cont = fim - inicio;
 
-    printf("[");
+        for(i = 0; i < cont; i++){
+            noB* atual = aux[inicio];
 
-    while(!fila_vazia(fila)){
-        noB* atual = dequeue(fila);
+            printf("[");
 
-        if(atual == NULL){
-            printf("\n");
+            for(j = 0; j < atual->num_chaves; j++){
+                printf("%d", atual->chaves[j]);
 
-            if(!fila_vazia(fila)){
-                enqueue(fila, NULL);
-                printf("[");
-            }
-        }
-
-        else{
-            int i;
-
-            for(i = 0; i < atual->num_chaves; i++){
-                printf("%d", atual->chaves[i]);
-                if(i < atual->num_chaves-1)
+                if(j+1 < atual->num_chaves)
                     printf(", ");
 
-                else
-                    printf("] ");
+                if(atual->filhos[j] != -1)
+                    aux[fim++] = ler_no(f, atual->filhos[j]);
             }
+            if(atual->filhos[j] != -1)
+                aux[fim++] = ler_no(f, atual->filhos[j]);
 
-            for(i = 0; atual->filhos[i] != -1 && i < atual->num_chaves+1; i++){
-                x = ler_no(f, atual->filhos[i]);
-                enqueue(fila, x);
-                aux[j++] = x;
-            }
+            printf("] ");
 
-            if(!consultar_nulo(fila))
-                printf("[");
+            inicio++;
         }
+        printf("\n");
     }
-    j--;
-    while(j >= 0)
-        free(aux[j--]);
+
+    while(fim >= 0)
+        free(aux[--fim]);
 }
