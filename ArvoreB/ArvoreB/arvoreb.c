@@ -291,6 +291,11 @@ ArvoreB tratar_underflow(ArvoreB raiz, int pos)
 
             raiz->num_chaves--;
 
+            if(eh_folha(irmao_esq)){
+                for(i = irmao_esq->num_chaves - ((ORDEM-1)/2); i < ORDEM; i++)
+                    irmao_esq->filho[i] = NULL;
+            }
+
             free(no_underflow);
         }
         else{
