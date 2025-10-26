@@ -2,6 +2,9 @@
 #include "../include/avl.h"
 #include "../include/fila.h"
 
+// Funcao para ler cabecalho
+// Pre-condicao: cabecalho inicializado
+// Pos-condicao: nenhuma
 cabecalho* ler_cabecalho(FILE* fr)
 {
     cabecalho* cab = malloc(sizeof(cabecalho));
@@ -12,12 +15,18 @@ cabecalho* ler_cabecalho(FILE* fr)
     return cab;
 }
 
+// Funcao para escrever cabecalho
+// Pre-condicao: cabecalho inicializado
+// Pos-condicao: atualiza cabecalho
 void escrever_cabecalho(FILE* fr, cabecalho* cab)
 {
     fseek(fr, 0, SEEK_SET);
     fwrite(cab, sizeof(cabecalho), 1, fr);
 }
 
+// Funcao para ler no
+// Pre-condicao: arvore criada
+// Pos-condicao: nenhuma
 no* ler_no(FILE* fr, int pos)
 {
     no* x = malloc(sizeof(no));
@@ -28,12 +37,18 @@ no* ler_no(FILE* fr, int pos)
     return x;
 }
 
+// Funcao para escrever no
+// Pre-condicao: arvore criada
+// Pos-condicao: atualiza no
 void escrever_no(FILE* fr, no* x, int pos)
 {
     fseek(fr, sizeof(cabecalho) + sizeof(no)*pos, SEEK_SET);
     fwrite(x, sizeof(no), 1, fr);
 }
 
+// Funcao para criar arvore AVL
+// Pre-condicao: nenhuma
+// Pos-condicao: cria arvore em arquivo binario
 void inicializar(FILE* fr)
 {
     cabecalho* cab = malloc(sizeof(cabecalho));
@@ -46,9 +61,20 @@ void inicializar(FILE* fr)
     free(cab);
 }
 
+// Funcao para verificar se um no eh vazio
+// Pre-condicao: arvore criada
+// Pos-condicao: nenhuma
+boolean vazia(int pos)
+{
+    return (pos == -1);
+}
+
+// Funcao para verificar altura da arvore
+// Pre-condicao: arvore criada
+// Pos-condicao: nenhuma
 int altura(FILE* fr, int pos)
 {
-    if(pos == -1)
+    if(vazia(pos))
         return -1;
 
     else{
@@ -67,17 +93,23 @@ int altura(FILE* fr, int pos)
     return 0;
 }
 
+// Funcao para verificar fator de balanceamento
+// Pre-condicao: arvore criada
+// Pos-condicao: nenhuma
 int fator_balanceamento(FILE* fr, no* x)
 {
     return labs(altura(fr, x->esq) - altura(fr, x->dir));
 }
 
+// Funcao para procurar menor valor da arvore
+// Pre-condicao: arvore criada
+// Pos-condicao: nenhuma
 int procurar_menor(FILE* fr, int pos)
 {
     no* x = ler_no(fr, pos);
     int chave;
 
-    while(x->esq != -1){
+    while(!vazia(x->esq)){
         pos = x->esq;
         free(x);
         ler_no(fr, pos);
@@ -88,6 +120,9 @@ int procurar_menor(FILE* fr, int pos)
     return chave;
 }
 
+// Funcao para procurar maior valor da arvore
+// Pre-condicao: arvore criada
+// Pos-condicao: nenhuma
 int procurar_maior(FILE* fr, int pos)
 {
     no* x = ler_no(fr, pos);
@@ -104,6 +139,9 @@ int procurar_maior(FILE* fr, int pos)
     return chave;
 }
 
+// Funcao para rotacionar subarvore
+// Pre-condicao: nenhuma
+// Pos-condicao: rotaciona o no a esquerda
 int rotacaoLL(FILE* fr, int pos)
 {
     no* u = ler_no(fr, pos);
@@ -128,6 +166,9 @@ int rotacaoLL(FILE* fr, int pos)
     return pos_y;
 }
 
+// Funcao para rotacionar subarvore
+// Pre-condicao: nenhuma
+// Pos-condicao: rotaciona o no a direita
 int rotacaoRR(FILE* fr, int pos)
 {
     no* u = ler_no(fr, pos);
@@ -152,6 +193,9 @@ int rotacaoRR(FILE* fr, int pos)
     return pos_y;
 }
 
+// Funcao para rotacionar subarvore
+// Pre-condicao: nenhuma
+// Pos-condicao: rotaciona duplamente o no alvo
 int rotacaoLR(FILE* fr, int pos)
 {
     no* x = ler_no(fr, pos);
@@ -164,6 +208,9 @@ int rotacaoLR(FILE* fr, int pos)
     return rotacaoLL(fr, pos);
 }
 
+// Funcao para rotacionar subarvore
+// Pre-condicao: nenhuma
+// Pos-condicao: rotaciona duplamente o no alvo
 int rotacaoRL(FILE* fr, int pos)
 {
     no* x = ler_no(fr, pos);
@@ -176,6 +223,9 @@ int rotacaoRL(FILE* fr, int pos)
     return rotacaoRR(fr, pos);
 }
 
+// Funcao para inserir chave
+// Pre-condicao: arvore criada
+// Pos-condicao: nenhuma
 void inserir(FILE* fr, int chave)
 {
     if(busca(fr, chave))
@@ -189,6 +239,9 @@ void inserir(FILE* fr, int chave)
     free(cab);
 }
 
+// Funcao auxiliar para inserir chave
+// Pre-condicao: nenhuma
+// Pos-condicao: insere chave na arvore
 int inserir_aux(FILE* fr, int chave, cabecalho* cab, int pos)
 {
     if(pos == -1){
@@ -257,6 +310,9 @@ int inserir_aux(FILE* fr, int chave, cabecalho* cab, int pos)
     return pos;
 }
 
+// Funcao para remover chave
+// Pre-condicao: arvore criada
+// Pos-condicao: nenhuma
 void remover(FILE* fr, int chave)
 {
     if(!busca(fr, chave))
@@ -269,6 +325,9 @@ void remover(FILE* fr, int chave)
     free(cab);
 }
 
+// Funcao auxiliar para remover chave
+// Pre-condicao: nenhuma
+// Pos-condicao: remove no buscado (se constar)
 int remover_aux(FILE* fr, int chave, cabecalho* cab, int pos)
 {
     no* aux = ler_no(fr, pos);
@@ -336,17 +395,23 @@ int remover_aux(FILE* fr, int chave, cabecalho* cab, int pos)
     return pos;
 }
 
-bool busca(FILE* fr, int chave)
+// Funcao para busca
+// Pre-condicao: arvore criada
+// Pos-condicao: nenhuma
+boolean busca(FILE* fr, int chave)
 {
     cabecalho* cab = ler_cabecalho(fr);
 
-    bool existe = busca_aux(fr, chave, cab->pos_raiz);
+    boolean existe = busca_aux(fr, chave, cab->pos_raiz);
     free(cab);
 
     return existe;
 }
 
-bool busca_aux(FILE* fr, int chave, int pos)
+// Funcao auxiliar para busca
+// Pre-condicao: nenhuma
+// Pos-condicao: retorna true se a chave constar
+boolean busca_aux(FILE* fr, int chave, int pos)
 {
     if(pos == -1)
         return false;
@@ -371,6 +436,9 @@ bool busca_aux(FILE* fr, int chave, int pos)
     return false;
 }
 
+// Funcao para imprimir arvore
+// Pre-condicao: arvore criada
+// Pos-condicao: nenhuma
 void imprimir(FILE* fr)
 {
     cabecalho* cab = ler_cabecalho(fr);
@@ -379,6 +447,9 @@ void imprimir(FILE* fr)
     free(cab);
 }
 
+// Funcao auxiliar para imprimir arvore
+// Pre-condicao: nenhuma
+// Pos-condicao: nenhuma
 void imprimir_aux(FILE* fr, int pos)
 {
     if(pos == -1)
@@ -394,6 +465,9 @@ void imprimir_aux(FILE* fr, int pos)
     free(aux);
 }
 
+// Funcao para imprimir registros lvires
+// Pre-condicao: arvore criada
+// Pos-condicao: nenhuma
 void imprimir_livres(FILE* fr)
 {
     cabecalho* cab = ler_cabecalho(fr);
@@ -409,53 +483,44 @@ void imprimir_livres(FILE* fr)
     free(cab);
 }
 
+// Funcao para imprimir por niveis
+// Pre-condicao: arvore criada
+// Pos-condicao: nenhuma
 void imprimir_niveis(FILE* fr)
 {
     cabecalho* cab = ler_cabecalho(fr);
     int pos = cab->pos_raiz;
-    Fila f = criar_fila();
-    no* aux[1000];
-    int i = 0;
+    free(cab);
 
-    no* x = ler_no(fr, pos);
-    aux[i++] = x;
+    no* aux[10000];
+    int inicio, fim, cont, i;
+    fim = inicio = 0;
 
-    enqueue(f, x);
-    enqueue(f, NULL);
-    printf("<");
+    aux[fim++] = ler_no(fr, pos);
 
-    while(!fila_vazia(f)){
-        no* atual = dequeue(f);
+    while(fim > inicio){
+        cont = fim - inicio;
 
-        if(atual == NULL){
-            printf(">\n");
+        printf("<");
+        for(i = 0; i < cont; i++){
+            no* atual = aux[inicio];
 
-            if(!fila_vazia(f)){
-                enqueue(f, NULL);
-                printf("<");
-            }
-        }
-
-        else{
             printf("%d", atual->chave);
 
-            if(atual->esq != -1){
-                no* x = ler_no(fr, atual->esq);
-                aux[i++] = x;
-                enqueue(f, x);
-            }
-            if(atual->dir != -1){
-                no* x = ler_no(fr, atual->dir);
-                aux[i++] = x;
-                enqueue(f, x);
-            }
-            if(!consultar_nulo(f))
-                printf(", ");
-        }
-    }
-    free(f);
-    i--;
+            if(atual->esq != -1)
+                aux[fim++] = ler_no(fr, atual->esq);
 
-    while(i >= 0)
-        free(aux[i--]);
+            if(atual->dir != -1)
+                aux[fim++] = ler_no(fr, atual->dir);
+
+            if(i+1 < cont)
+                printf(" ");
+
+            inicio++;
+        }
+        printf(">\n");
+    }
+
+    while(fim >= 0)
+        free(aux[--fim]);
 }

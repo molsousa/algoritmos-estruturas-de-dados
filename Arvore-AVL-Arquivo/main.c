@@ -35,7 +35,6 @@ int main()
     remover(fr, 55);
     remover(fr, 76);
     remover(fr, 78);
-    //remover(fr, 43);
 
     imprimir_livres(fr);
 
