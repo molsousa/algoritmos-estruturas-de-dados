@@ -25,8 +25,8 @@ arvoreAVL* criar_arvore()
 
 // Verificar se um no eh vazio
 // Pre-condicao: nenhum
-// Pos-condicao: retorna 1 se vazio
-int vazia(struct noAVL* r)
+// Pos-condicao: retorna true se vazio
+boolean vazia(struct noAVL* r)
 {
     return (r == NULL);
 }
@@ -55,17 +55,6 @@ void liberar_no(struct noAVL* r)
     liberar_no(r->esq);
     liberar_no(r->dir);
     free(r);
-}
-
-// Funcao para encontrar maior entre dois valores
-// Pre-condicao: nenhuma
-// Pos-condicao: retorna maior valor
-int maior(int x, int y)
-{
-    if(x > y)
-        return x;
-
-    return y;
 }
 
 // Funcao para retornar altura do no
@@ -300,36 +289,30 @@ void imprimir_niveis(arvoreAVL* r)
     if(vazia(*r))
         return;
 
-    Fila fila = criar_fila();
+    struct noAVL* aux[10000];
+    int fim, inicio, cont, i;
 
-    enqueue(fila, *r);
-    enqueue(fila, NULL);
-    printf("<");
+    inicio = fim = 0;
 
-    while(!fila_vazia(fila)){
-        struct noAVL* atual = dequeue(fila);
+    aux[fim++] = *r;
 
-        if(vazia(atual)){
-            printf(">\n");
+    while(fim > inicio){
+        cont = fim - inicio;
+        printf("<");
 
-            if(!fila_vazia(fila)){
-                printf("<");
-                enqueue(fila, NULL);
-            }
-        }
-        else{
+        for(i = 0; i < cont; i++){
+            struct noAVL* atual = aux[inicio++];
             printf("%d", atual->chave);
 
-            if(!consultar_nulo(fila))
+            if(atual->esq)
+                aux[fim++] = atual->esq;
+
+            if(atual->dir)
+                aux[fim++] = atual->dir;
+
+            if(i+1 < cont)
                 printf(" ");
-
-            if(!vazia(atual->esq))
-                enqueue(fila, atual->esq);
-
-            if(!vazia(atual->dir))
-                enqueue(fila, atual->dir);
         }
+        printf(">\n");
     }
-
-    fila = liberar_fila(fila);
 }
