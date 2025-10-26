@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "../include/rubronegra.h"
-#include "../include/fila.h"
 
 // Funcao para criar uma arvore rubro negra
 // Pre-condicao: nenhuma
@@ -534,56 +533,36 @@ void imprimir(FILE* f, int ordem)
 void imprimir_niveis(FILE* f)
 {
     cabecalho* cab = ler_cabecalho(f);
+    int pos = cab->pos_raiz;
+    free(cab);
 
-    if(cab->pos_raiz == -1){
-        free(cab);
-        return;
-    }
+    no* aux[10000];
+    int fim, inicio, i, cont;
 
-    no* x = ler_no(f, cab->pos_raiz);
-    no* aux[1000];
-    int i = 0;
+    fim = inicio = 0;
+    aux[fim++] = ler_no(f, pos);
 
-    Fila fila = criar_fila();
-    enqueue(fila, x);
-    enqueue(fila, NULL);
-    aux[i++] = x;
-    printf("< ");
+    while(fim > inicio){
+        cont = fim - inicio;
+        printf("<");
 
-    while(!fila_vazia(fila)){
-        no* atual = dequeue(fila);
+        for(i = 0; i < cont; i++){
+            no* atual = aux[inicio++];
 
-        if(atual == NULL){
-            printf(" >\n");
-
-            if(!fila_vazia(fila)){
-                printf("< ");
-                enqueue(fila, NULL);
-            }
-        }
-        else{
             printf("%d", atual->chave);
 
-            if(atual->esq != -1){
-                x = ler_no(f, atual->esq);
-                enqueue(fila, x);
-                aux[i++] = x;
-            }
-            if(atual->dir != -1){
-                x = ler_no(f, atual->dir);
-                enqueue(fila, x);
-                aux[i++] = x;
-            }
-            if(!consultar_nulo(fila))
+            if(atual->esq != -1)
+                aux[fim++] = ler_no(f, atual->esq);
+
+            if(atual->dir != -1)
+                aux[fim++] = ler_no(f, atual->dir);
+
+            if(i+1 < cont)
                 printf(" ");
         }
-    }
-    i--;
-    while(i >= 0)
-        free(aux[i--]);
 
-    fila = liberar_fila(fila);
-    free(cab);
+        printf(">\n");
+    }
 }
 
 // Funcao auxiliar para contar total de nos
