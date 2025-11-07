@@ -2,23 +2,21 @@
 #include <stdlib.h>
 #include "../include/arvorebp.h"
 
-// Estrutura para B+
 struct nodeBMais{
-    void* ponteiro[ORDEM+1];
     int chave[ORDEM];
-    struct nodeBMais* pai;
-    boolean eh_folha;
+    void** ponteiro;
     int num_chaves;
+    boolean eh_folha;
 };
-
-boolean vazia(noBMais r)
-{
-    return (r == NULL);
-}
 
 noBMais criar_arvore()
 {
     return NULL;
+}
+
+boolean vazia(noBMais r)
+{
+    return (r == NULL);
 }
 
 boolean overflow(noBMais r)
@@ -28,23 +26,20 @@ boolean overflow(noBMais r)
 
 noBMais split(noBMais r, int* m)
 {
+    int q, i;
     noBMais y = malloc(sizeof(struct nodeBMais));
+    y->ponteiro = malloc((ORDEM+1)*sizeof(void*));
 
+    q = r->num_chaves/2;
+    y->num_chaves = r->num_chaves - q;
 
-    int q = r->num_chaves/2;
-
-    y->num_chaves = r->num_chaves - q - 1;
     r->num_chaves = q;
-
     *m = r->chave[q];
-    int i = 0;
 
     y->ponteiro[0] = r->ponteiro[q+1];
-
-    while(i < y->num_chaves){
-        y->chave[q] = r->chave[q+i];
-        y->ponteiro[i+1] = r->ponteiro[q+i+2];
-        i++;
+    for(i = 0; i < y->num_chaves; i++){
+        y->chave[i] = r->chave[q+i];
+        y->ponteiro[i+1] = r->ponteiro[q+i+1];
     }
 
     return y;
@@ -52,20 +47,18 @@ noBMais split(noBMais r, int* m)
 
 boolean busca_pos(noBMais r, int chave, int* pos)
 {
-    for(*pos = 0; *pos < r->num_chaves; ++*pos)
-        if(chave == r->chave[(*pos)])
-            return 1;
-
+    for((*pos) = 0; (*pos) < r->num_chaves; ++*pos)
+        if(r->chave[(*pos)] == chave)
+            return true;
         else if(chave < r->chave[(*pos)])
             break;
 
-    return 0;
+    return false;
 }
 
 void adicionar_direita(noBMais r, int pos, int k, noBMais p)
 {
     int i;
-
     for(i = r->num_chaves; i > pos; i--){
         r->chave[i] = r->chave[i-1];
         r->ponteiro[i+1] = r->ponteiro[i];
@@ -86,58 +79,95 @@ void inserir_aux(noBMais r, int chave)
 
         else{
             inserir_aux(r->ponteiro[pos], chave);
+
             if(overflow(r->ponteiro[pos])){
                 int m;
-                noBMais aux = split(r->ponteiro[pos], &m);
-                adicionar_direita(r, pos, m, aux);
+                noBMais p = split(r->ponteiro[pos], &m);
+                adicionar_direita(r, pos, m, p);
             }
         }
     }
 }
 
+noBMais criaPagina(int* chave, boolean eh_folha, int num_chaves)
+{
+    int i;
+
+    noBMais r = malloc(sizeof(struct nodeBMais));
+    r->ponteiro = malloc((ORDEM+1) * sizeof(void*));
+
+    for(i = 0; i < num_chaves; i++)
+        r->chave[i] = chave[i];
+
+    r->eh_folha = eh_folha;
+    r->num_chaves = num_chaves;
+
+    for(i = 0; i <= ORDEM; i++)
+        r->ponteiro[i] = NULL;
+
+    return r;
+}
+
 noBMais inserir(noBMais r, int chave)
 {
-    if(vazia(r)){
-        int i;
+    if(vazia(r))
+        return criaPagina(&chave, true, 1);
 
-        r = malloc(sizeof(struct nodeBMais));
-
-        r->chave[0] = chave;
-        r->pai = NULL;
-        r->eh_folha = true;
-
-        for(i = 0; i < ORDEM; i++)
-            r->ponteiro[i] = NULL;
-
-        r->num_chaves = 1;
-    }
     else{
         inserir_aux(r, chave);
 
         if(overflow(r)){
-            int m;
             int i;
+            int m;
 
             noBMais x = split(r, &m);
-            noBMais nova_raiz = malloc(sizeof(struct nodeBMais));
+            noBMais nova_raiz = criaPagina(&m, false, 1);
 
-            nova_raiz->chave[0] = m;
-
-            r->pai = nova_raiz;
             nova_raiz->ponteiro[0] = r;
-
-            x->pai = nova_raiz;
             nova_raiz->ponteiro[1] = x;
 
-
-            for(i = (((int) ORDEM/2)+1); i < ORDEM; i++)
+            for(i = (((int)ORDEM/2)+1); i < ORDEM; i++)
                 r->ponteiro[i] = NULL;
-
-            nova_raiz->num_chaves = 1;
 
             return nova_raiz;
         }
     }
 
     return r;
+}
+
+void imprimir_niveis(noBMais r)
+{
+    if(vazia(r))
+        return;
+
+    void** aux = malloc(10000*sizeof(void*));
+    int i, j, nivel, inicio, fim;
+    fim = inicio = 0;
+
+    aux[fim++] = r;
+
+    while(fim > inicio){
+        nivel = fim - inicio;
+
+        for(i = 0; i < nivel; i++){
+            noBMais atual = aux[inicio++];
+            printf("[");
+
+            for(j = 0; j < atual->num_chaves; j++){
+                printf("%d", atual->chave[j]);
+
+                if(j < atual->num_chaves - 1)
+                    printf(", ");
+            }
+            printf("] ");
+
+            for(j = 0; j <= atual->num_chaves; j++)
+                if(atual->ponteiro[j] != NULL)
+                    aux[fim++] = atual->ponteiro[j];
+        }
+        printf("\n");
+    }
+
+    free(aux);
 }
