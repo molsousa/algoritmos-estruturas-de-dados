@@ -1,7 +1,7 @@
 #ifndef ARVORE_B_MAIS_H_INCLUDED
 #define ARVORE_B_MAIS_H_INCLUDED
 
-#define ORDEM 5
+#define ORDEM 7
 
 // Definicao de tipo booleano
 typedef enum{false = 0, true = 1}boolean;

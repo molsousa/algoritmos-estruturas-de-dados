@@ -33,6 +33,12 @@ noBMais split(noBMais r, int* m)
     q = r->num_chaves/2;
     y->num_chaves = r->num_chaves - q;
 
+    if(r->eh_folha)
+        y->eh_folha = true;
+
+    else
+        y->eh_folha = false;
+
     r->num_chaves = q;
     *m = r->chave[q];
 
@@ -67,6 +73,7 @@ void adicionar_direita(noBMais r, int pos, int k, noBMais p)
     r->chave[pos] = k;
     r->ponteiro[pos+1] = p;
     r->num_chaves++;
+
 }
 
 void inserir_aux(noBMais r, int chave)
@@ -74,8 +81,9 @@ void inserir_aux(noBMais r, int chave)
     int pos;
 
     if(!busca_pos(r, chave, &pos)){
-        if(r->eh_folha)
+        if(r->eh_folha){
             adicionar_direita(r, pos, chave, NULL);
+        }
 
         else{
             inserir_aux(r->ponteiro[pos], chave);
