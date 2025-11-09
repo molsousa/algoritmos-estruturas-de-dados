@@ -21,6 +21,8 @@ int main()
     r = inserir(r, 2);
     r = inserir(r, 12);
     r = inserir(r, 15);
+    r = inserir(r, 9);
+
     imprimir_niveis(r);
 
     return 0;

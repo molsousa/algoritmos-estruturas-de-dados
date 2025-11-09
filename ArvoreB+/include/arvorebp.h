@@ -1,7 +1,8 @@
 #ifndef ARVORE_B_MAIS_H_INCLUDED
 #define ARVORE_B_MAIS_H_INCLUDED
 
-#define ORDEM 7
+#define ORDEM 5
+#define MIN_CHAVES ((ORDEM - 1)/2)
 
 // Definicao de tipo booleano
 typedef enum{false = 0, true = 1}boolean;
@@ -22,7 +23,11 @@ void adicionar_direita(noBMais, int, int, noBMais);
 
 void inserir_aux(noBMais, int);
 
+noBMais criaPagina(int*, boolean, int);
+
 noBMais inserir(noBMais, int);
+
+void ler_intervalo(noBMais);
 
 noBMais remover(noBMais, int);
 

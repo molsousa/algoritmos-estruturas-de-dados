@@ -3,9 +3,9 @@
 #include "../include/arvorebp.h"
 
 struct nodeBMais{
-    int chave[ORDEM];
+    int* chave;
     void** ponteiro;
-    int num_chaves;
+    short num_chaves;
     boolean eh_folha;
 };
 
@@ -27,25 +27,35 @@ boolean overflow(noBMais r)
 noBMais split(noBMais r, int* m)
 {
     int q, i;
+
     noBMais y = malloc(sizeof(struct nodeBMais));
-    y->ponteiro = malloc((ORDEM+1)*sizeof(void*));
+    y->chave = malloc(ORDEM * sizeof(int));
+    y->ponteiro = calloc((ORDEM+1), sizeof(void*));
 
     q = r->num_chaves/2;
-    y->num_chaves = r->num_chaves - q;
-
-    if(r->eh_folha)
-        y->eh_folha = true;
-
-    else
-        y->eh_folha = false;
-
-    r->num_chaves = q;
     *m = r->chave[q];
 
     y->ponteiro[0] = r->ponteiro[q+1];
-    for(i = 0; i < y->num_chaves; i++){
-        y->chave[i] = r->chave[q+i];
-        y->ponteiro[i+1] = r->ponteiro[q+i+1];
+
+    if(r->eh_folha){
+        y->num_chaves = r->num_chaves - q;
+
+        y->eh_folha = true;
+        r->num_chaves = q;
+
+        for(i = 0; i < y->num_chaves; i++)
+            y->chave[i] = r->chave[q+i];
+    }
+    else{
+        y->num_chaves = r->num_chaves - q - 1;
+
+        y->eh_folha = false;
+        r->num_chaves = q;
+
+        for(i = 0; i < y->num_chaves; i++){
+            y->chave[i] = r->chave[q+i+1];
+            y->ponteiro[i+1] = r->ponteiro[q+i+2];
+        }
     }
 
     return y;
@@ -56,6 +66,7 @@ boolean busca_pos(noBMais r, int chave, int* pos)
     for((*pos) = 0; (*pos) < r->num_chaves; ++*pos)
         if(r->chave[(*pos)] == chave)
             return true;
+
         else if(chave < r->chave[(*pos)])
             break;
 
@@ -73,7 +84,6 @@ void adicionar_direita(noBMais r, int pos, int k, noBMais p)
     r->chave[pos] = k;
     r->ponteiro[pos+1] = p;
     r->num_chaves++;
-
 }
 
 void inserir_aux(noBMais r, int chave)
@@ -81,9 +91,8 @@ void inserir_aux(noBMais r, int chave)
     int pos;
 
     if(!busca_pos(r, chave, &pos)){
-        if(r->eh_folha){
+        if(r->eh_folha)
             adicionar_direita(r, pos, chave, NULL);
-        }
 
         else{
             inserir_aux(r->ponteiro[pos], chave);
@@ -101,17 +110,17 @@ noBMais criaPagina(int* chave, boolean eh_folha, int num_chaves)
 {
     int i;
 
-    noBMais r = malloc(sizeof(struct nodeBMais));
-    r->ponteiro = malloc((ORDEM+1) * sizeof(void*));
+    noBMais r;
+
+    r = malloc(sizeof(struct nodeBMais));
+    r->chave = malloc(ORDEM * sizeof(int));
+    r->ponteiro = calloc((ORDEM+1), sizeof(void*));
 
     for(i = 0; i < num_chaves; i++)
         r->chave[i] = chave[i];
 
     r->eh_folha = eh_folha;
     r->num_chaves = num_chaves;
-
-    for(i = 0; i <= ORDEM; i++)
-        r->ponteiro[i] = NULL;
 
     return r;
 }
@@ -149,7 +158,7 @@ void imprimir_niveis(noBMais r)
     if(vazia(r))
         return;
 
-    void** aux = malloc(10000*sizeof(void*));
+    void** aux = malloc(10000 * sizeof(void*));
     int i, j, nivel, inicio, fim;
     fim = inicio = 0;
 
@@ -166,14 +175,24 @@ void imprimir_niveis(noBMais r)
                 printf("%d", atual->chave[j]);
 
                 if(j < atual->num_chaves - 1)
-                    printf(", ");
+                    printf("|");
             }
-            printf("] ");
+
+            printf("]");
+
+            if(atual->eh_folha)
+                printf("->");
+
+            else
+                printf(" ");
 
             for(j = 0; j <= atual->num_chaves; j++)
                 if(atual->ponteiro[j] != NULL)
                     aux[fim++] = atual->ponteiro[j];
         }
+        if(fim == inicio && !r->eh_folha)
+            printf("NULL");
+
         printf("\n");
     }
 
