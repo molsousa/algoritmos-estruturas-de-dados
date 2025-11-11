@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "../include/arvorebp.h"
 
+// Estrutura para no B+ com ponteiro para pai
 struct nodeBMais{
     int* chave;
     void** ponteiro;
@@ -10,19 +11,69 @@ struct nodeBMais{
     struct nodeBMais* pai;
 };
 
-noBMais criar_arvore()
-{
-    return NULL;
-}
-
 boolean vazia(noBMais r)
 {
     return (r == NULL);
 }
 
+noBMais criar_arvore()
+{
+    return NULL;
+}
+
 boolean overflow(noBMais r)
 {
     return (r->num_chaves == ORDEM);
+}
+
+void conta_nos_folhas_aux(noBMais r, int* total)
+{
+    if(vazia(r))
+        return;
+
+    int i;
+
+    if(r->eh_folha)
+        ++*total;
+
+    for(i = 0; i <= r->num_chaves; i++)
+        conta_nos_folhas_aux(r->ponteiro[i], total);
+}
+
+void conta_nos_aux(noBMais r, int* total)
+{
+    if(vazia(r))
+        return;
+
+    int i;
+
+    ++*total;
+
+    for(i = 0; i <= r->num_chaves; i++)
+        conta_nos_aux(r->ponteiro[i], total);
+}
+
+int conta_nos(noBMais r, modo m)
+{
+    if(vazia(r))
+        return 0;
+
+    int total = 0;
+    int aux = 0;
+
+    if(m == folha || m == interno)
+        conta_nos_folhas_aux(r, &total);
+
+    else
+        conta_nos_aux(r, &total);
+
+    if(m == interno){
+        conta_nos_aux(r, &aux);
+
+        total = aux - total;
+    }
+
+    return total;
 }
 
 noBMais split(noBMais r, int* m)
@@ -32,7 +83,6 @@ noBMais split(noBMais r, int* m)
     noBMais y = malloc(sizeof(struct nodeBMais));
     y->chave = malloc(ORDEM * sizeof(int));
     y->ponteiro = calloc((ORDEM+1), sizeof(void*));
-    y->pai = NULL;
 
     q = r->num_chaves/2;
     *m = r->chave[q];
@@ -147,8 +197,8 @@ void corrigir_pai(noBMais pai)
 
 void corrigir_intervalo(noBMais r)
 {
-    void** aux = malloc(10000 * sizeof(void*));
-    void** nos_intervalo = malloc(10000 * sizeof(void*));
+    void** aux = malloc(conta_nos(r, nosTotais) * sizeof(void*));
+    void** nos_intervalo = malloc(conta_nos(r, folha) * sizeof(void*));
 
     int i, j, k, fim, inicio, nivel;
     k = fim = inicio = 0;
@@ -169,6 +219,7 @@ void corrigir_intervalo(noBMais r)
                     aux[fim++] = atual->ponteiro[j];
         }
     }
+    free(aux);
 
     for(i = 0; i < k-1; i++){
         noBMais atual = nos_intervalo[i];
@@ -177,7 +228,6 @@ void corrigir_intervalo(noBMais r)
         atual->ponteiro[ORDEM] = prox;
     }
 
-    free(aux);
     free(nos_intervalo);
 }
 
@@ -209,6 +259,8 @@ noBMais inserir(noBMais r, int chave)
             for(i = (((int)ORDEM/2)+1); i < ORDEM; i++)
                 r->ponteiro[i] = NULL;
 
+            corrigir_intervalo(r);
+
             return nova_raiz;
         }
     }
@@ -223,14 +275,70 @@ void ler_intervalo(noBMais r)
     while(!vazia(r->ponteiro[0]))
         r = r->ponteiro[0];
 
-    while(r != NULL){
+    while(!vazia(r)){
         int i;
 
-        for(i = 0; i < r->num_chaves; i++)
-            printf("%d ", r->chave[i]);
+        printf("[");
+        for(i = 0; i < r->num_chaves; i++){
+            printf("%d", r->chave[i]);
+
+            if(i < r->num_chaves-1)
+                printf(",");
+        }
+
+        printf("]");
 
         r = r->ponteiro[ORDEM];
     }
+    printf("\n");
+}
+
+static void imprimir_aberto(noBMais r, int a, int b)
+{
+    if(vazia(r))
+        return;
+
+    int i;
+
+    for(i = 0; i < r->num_chaves; i++){
+        if(r->chave[i] > a && r->chave[i] < b){
+            printf("%4d", r->chave[i]);
+        }
+    }
+
+    imprimir_aberto(r->ponteiro[ORDEM], a, b);
+}
+
+static void imprimir_fechado(noBMais r, int a, int b)
+{
+    if(vazia(r))
+        return;
+
+    int i;
+
+    for(i = 0; i < r->num_chaves; i++){
+        if(r->chave[i] >= a && r->chave[i] <= b)
+            printf("%4d", r->chave[i]);
+    }
+
+    imprimir_fechado(r->ponteiro[ORDEM], a, b);
+}
+
+void imprimir_intervalo(noBMais r, int a, int b, intervalo ab)
+{
+    if(vazia(r))
+        return;
+
+    while(!vazia(r->ponteiro[0]))
+        r = r->ponteiro[0];
+
+    if(ab == aberto)
+        imprimir_aberto(r, a, b);
+
+    else
+        imprimir_fechado(r, a, b);
+
+    printf("\n");
 }
 
 void imprimir_niveis(noBMais r)
@@ -238,7 +346,7 @@ void imprimir_niveis(noBMais r)
     if(vazia(r))
         return;
 
-    void** aux = malloc(10000 * sizeof(void*));
+    void** aux = malloc(conta_nos(r, nosTotais) * sizeof(void*));
     int i, j, nivel, inicio, fim;
     fim = inicio = 0;
 
@@ -271,7 +379,7 @@ void imprimir_niveis(noBMais r)
                     aux[fim++] = atual->ponteiro[j];
         }
         if(fim == inicio && !r->eh_folha)
-            printf("NULL");
+            printf("NULL\n");
 
         printf("\n");
     }

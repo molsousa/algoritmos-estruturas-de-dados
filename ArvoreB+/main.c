@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "include/arvorebp.h"
 
 int main()
@@ -44,12 +45,17 @@ int main()
     r = inserir(r, 90);
     r = inserir(r, 85);
     r = inserir(r, 82);
+    r = inserir(r, 6);
     /*
     */
 
     imprimir_niveis(r);
 
-    ler_intervalo(r);
+    imprimir_intervalo(r, 11, 34, fechado);
+
+    printf("\ntotal nos internos: %d\n", conta_nos(r, interno));
+    printf("\ntotal nos folhas: %d\n", conta_nos(r, folha));
+    printf("\ntotal nos: %d\n", conta_nos(r, nosTotais));
 
     return 0;
 }
