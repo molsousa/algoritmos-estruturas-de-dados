@@ -25,6 +25,8 @@ void inserir_aux(noBMais, int);
 
 noBMais criaPagina(int*, boolean, int);
 
+void corrigir_pai(noBMais);
+
 noBMais inserir(noBMais, int);
 
 void ler_intervalo(noBMais);

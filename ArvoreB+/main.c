@@ -22,8 +22,34 @@ int main()
     r = inserir(r, 12);
     r = inserir(r, 15);
     r = inserir(r, 9);
+    r = inserir(r, 24);
+    r = inserir(r, 30);
+    r = inserir(r, 50);
+    r = inserir(r, 55);
+    r = inserir(r, 25);
+    r = inserir(r, 26);
+    r = inserir(r, 21);
+    r = inserir(r, 14);
+    r = inserir(r, 16);
+    r = inserir(r, 13);
+    r = inserir(r, 17);
+    r = inserir(r, 75);
+    r = inserir(r, 71);
+    r = inserir(r, 63);
+    r = inserir(r, 79);
+    r = inserir(r, 68);
+    r = inserir(r, 80);
+    r = inserir(r, 81);
+    r = inserir(r, 99);
+    r = inserir(r, 90);
+    r = inserir(r, 85);
+    r = inserir(r, 82);
+    /*
+    */
 
     imprimir_niveis(r);
+
+    ler_intervalo(r);
 
     return 0;
 }
