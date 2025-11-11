@@ -11,21 +11,33 @@ struct nodeBMais{
     struct nodeBMais* pai;
 };
 
+// Funcao para verificar se uma arvore eh vazia
+// Pre-condicao: nenhuma
+// Pos-condicao: nenhuma
 boolean vazia(noBMais r)
 {
     return (r == NULL);
 }
 
+// Funcao para criar arvore
+// Pre-condicao: nenhuma
+// Pos-condicao: retorna nulo para tipo noBMais
 noBMais criar_arvore()
 {
     return NULL;
 }
 
+// Funcao para verificar overflow
+// Pre-condicao: nenhuma
+// Pos-condicao: nenhuma
 boolean overflow(noBMais r)
 {
     return (r->num_chaves == ORDEM);
 }
 
+// Funcao para contar folhas totais
+// Pre-condicao: nenhuma
+// Pos-condicao: insere no ponteiro total o valor total de folhas
 void conta_nos_folhas_aux(noBMais r, int* total)
 {
     if(vazia(r))
@@ -40,6 +52,9 @@ void conta_nos_folhas_aux(noBMais r, int* total)
         conta_nos_folhas_aux(r->ponteiro[i], total);
 }
 
+// Funcao para contar nos totais
+// Pre-condicao: nenhuma
+// Pos-condicao: insere no ponteiro total o valor total de nos
 void conta_nos_aux(noBMais r, int* total)
 {
     if(vazia(r))
@@ -53,6 +68,9 @@ void conta_nos_aux(noBMais r, int* total)
         conta_nos_aux(r->ponteiro[i], total);
 }
 
+// Funcao chamadora para contar nos
+// Pre-condicao: arvore criada
+// Pos-condicao: nenhuma
 int conta_nos(noBMais r, modo m)
 {
     if(vazia(r))
@@ -76,6 +94,9 @@ int conta_nos(noBMais r, modo m)
     return total;
 }
 
+// Funcao para separar nos
+// Pre-condicao: overflow
+// Pos-condicao: retorna o no a direita e a chave sucessora no ponteiro
 noBMais split(noBMais r, int* m)
 {
     int q, i;
@@ -113,6 +134,9 @@ noBMais split(noBMais r, int* m)
     return y;
 }
 
+// Funcao para buscar posicao de pagina B+
+// Pre-condicao: arvore criada
+// Pos-condicao: retorna verdadeiro se encontrada a chave
 boolean busca_pos(noBMais r, int chave, int* pos)
 {
     for((*pos) = 0; (*pos) < r->num_chaves; ++*pos)
@@ -125,6 +149,9 @@ boolean busca_pos(noBMais r, int chave, int* pos)
     return false;
 }
 
+// Funcao para adicionar chave a direita
+// Pre-condicao: nenhuma
+// Pos-condicao: insere chave e ponteiro a direita
 void adicionar_direita(noBMais r, int pos, int k, noBMais p)
 {
     int i;
@@ -144,6 +171,9 @@ void adicionar_direita(noBMais r, int pos, int k, noBMais p)
     r->num_chaves++;
 }
 
+// Funcao auxiliar para inserir em pagina B
+// Pre-condicao: nenhuma
+// Pos-condicao: insere nova chave
 void inserir_aux(noBMais r, int chave)
 {
     int pos;
@@ -164,6 +194,9 @@ void inserir_aux(noBMais r, int chave)
     }
 }
 
+// Funcao para criar pagina B
+// Pre-condicao: nenhuma
+// Pos-condicao: cria um ponteiro para pagina B
 noBMais criaPagina(int* chave, boolean eh_folha, int num_chaves)
 {
     int i;
@@ -184,6 +217,9 @@ noBMais criaPagina(int* chave, boolean eh_folha, int num_chaves)
     return r;
 }
 
+// Funcao para correcao de ponteiro para pai
+// Pre-condicao: nenhuma
+// Pos-condicao: insere ponteiro para pai ao no
 void corrigir_pai(noBMais pai)
 {
     noBMais r;
@@ -195,6 +231,9 @@ void corrigir_pai(noBMais pai)
     }
 }
 
+// Funcao para correcao de intervalos
+// Pre-condicao: nenhuma
+// Pos-condicao: corrige e insere ponteiros de proximo aos intervalos
 void corrigir_intervalo(noBMais r)
 {
     void** aux = malloc(conta_nos(r, nosTotais) * sizeof(void*));
@@ -231,6 +270,9 @@ void corrigir_intervalo(noBMais r)
     free(nos_intervalo);
 }
 
+// Funcao para inserir chave na arvore
+// Pre-condicao: arvore criada
+// Pos-condicao: insere chave na arvore
 noBMais inserir(noBMais r, int chave)
 {
     if(vazia(r))
@@ -270,6 +312,9 @@ noBMais inserir(noBMais r, int chave)
     return r;
 }
 
+// Funcao para imprimir intervalo completo de chaves
+// Pre-condicao: nenhuma
+// Pos-condicao: nenhuma
 void ler_intervalo(noBMais r)
 {
     while(!vazia(r->ponteiro[0]))
@@ -293,6 +338,9 @@ void ler_intervalo(noBMais r)
     printf("\n");
 }
 
+// Funcao auxiliar para imprimir intervalo aberto
+// Pre-condicao: nenhuma
+// Pos-condicao: nenhuma
 static void imprimir_aberto(noBMais r, int a, int b)
 {
     if(vazia(r))
@@ -309,6 +357,9 @@ static void imprimir_aberto(noBMais r, int a, int b)
     imprimir_aberto(r->ponteiro[ORDEM], a, b);
 }
 
+// Funcao auxiliar para imprimir intervalo fechado
+// Pre-condicao: nenhuma
+// Pos-condicao: nenhuma
 static void imprimir_fechado(noBMais r, int a, int b)
 {
     if(vazia(r))
@@ -324,6 +375,9 @@ static void imprimir_fechado(noBMais r, int a, int b)
     imprimir_fechado(r->ponteiro[ORDEM], a, b);
 }
 
+// Funcao chamadora para imprimir intervalo
+// Pre-condicao: nenhuma
+// Pos-condicao: nenhuma
 void imprimir_intervalo(noBMais r, int a, int b, intervalo ab)
 {
     if(vazia(r))
@@ -341,6 +395,9 @@ void imprimir_intervalo(noBMais r, int a, int b, intervalo ab)
     printf("\n");
 }
 
+// Funcao para imprimir por niveis
+// Pre-condicao: nenhuma
+// Pos-condicao: nenhuma
 void imprimir_niveis(noBMais r)
 {
     if(vazia(r))

@@ -20,57 +20,109 @@ typedef enum{
 // Definicao de tipo arvoreB+
 typedef struct nodeBMais* noBMais;
 
-// Entrada: ponteiro para no de B+
+// Funcao para verificar se uma arvore eh vazia
+// Pre-condicao: nenhuma
+// Pos-condicao: nenhuma
+// Entrada: ponteiro para pagina de B+
 boolean vazia(noBMais);
 
+// Funcao para criar arvore
+// Pre-condicao: nenhuma
+// Pos-condicao: retorna nulo para tipo noBMais
+// Entrada: nenhuma
 noBMais criar_arvore();
 
-// Entrada: ponteiro para no de B+
+// Funcao para verificar overflow
+// Pre-condicao: nenhuma
+// Pos-condicao: nenhuma
+// Entrada: ponteiro para pagina de B+
 boolean overflow(noBMais);
 
-// Entrada: ponteiro para no de B+, ponteiro para valor total
+// Funcao para contar folhas totais
+// Pre-condicao: nenhuma
+// Pos-condicao: insere no ponteiro total o valor total de folhas
+// Entrada: ponteiro para pagina de B+, ponteiro para valor total
 void conta_nos_folhas_aux(noBMais, int*);
 
-// Entrada: ponteiro para no de B+, ponteiro para valor total
+// Funcao para contar nos totais
+// Pre-condicao: nenhuma
+// Pos-condicao: insere no ponteiro total o valor total de nos
+// Entrada: ponteiro para pagina de B+, ponteiro para valor total
 void conta_nos_aux(noBMais, int*);
 
-// Entrada: ponteiro para no de B+, valor para modo
+// Funcao chamadora para contar nos
+// Pre-condicao: arvore criada
+// Pos-condicao: nenhuma
+// Entrada: ponteiro para pagina de B+, valor para modo
 int conta_nos(noBMais, modo);
 
-// Entrada: ponteiro para no de B+, valor para chave sucessora
+// Funcao para separar nos
+// Pre-condicao: overflow
+// Pos-condicao: retorna o no a direita e a chave sucessora no ponteiro
+// Entrada: ponteiro para pagina de B+, valor para chave sucessora
 noBMais split(noBMais, int*);
 
-// Entrada: ponteiro para no de B+, chave buscada, valor da posicao
+// Funcao para buscar posicao de pagina B+
+// Pre-condicao: arvore criada
+// Pos-condicao: retorna verdadeiro se encontrada a chave
+// Entrada: ponteiro para pagina de B+, chave buscada, valor da posicao
 boolean busca_pos(noBMais, int, int*);
 
-// Entrada: ponteiro para no de B+, posicao da chave e no, chave a ser inserida, ponteiro a ser adicionado
+// Funcao para adicionar chave a direita
+// Pre-condicao: nenhuma
+// Pos-condicao: insere chave e ponteiro a direita
+// Entrada: ponteiro para pagina de B+, posicao da chave e no, chave a ser inserida, ponteiro a ser adicionado
 void adicionar_direita(noBMais, int, int, noBMais);
 
-// Entrada: ponteiro para no de B+, chave a ser inserida
+// Funcao auxiliar para inserir em pagina B
+// Pre-condicao: nenhuma
+// Pos-condicao: insere nova chave
+// Entrada: ponteiro para pagina de B+, chave a ser inserida
 void inserir_aux(noBMais, int);
 
+// Funcao para criar pagina B
+// Pre-condicao: nenhuma
+// Pos-condicao: cria um ponteiro para pagina B
 // Entrada: chaves a inserir, valor booleano para folha, numero de chaves
 noBMais criaPagina(int*, boolean, int);
 
-// Entrada: ponteiro para no de B+
+// Funcao para correcao de ponteiro para pai
+// Pre-condicao: nenhuma
+// Pos-condicao: insere ponteiro para pai ao no
+// Entrada: ponteiro para pagina de B+
 void corrigir_pai(noBMais);
 
-// Entrada: ponteiro para no de B+
+// Funcao para correcao de intervalos
+// Pre-condicao: nenhuma
+// Pos-condicao: corrige e insere ponteiros de proximo aos intervalos
+// Entrada: ponteiro para pagina de B+
 void corrigir_intervalo(noBMais);
 
-// Entrada: ponteiro para no de B+, chave a ser inserida
+// Funcao para inserir chave na arvore
+// Pre-condicao: arvore criada
+// Pos-condicao: insere chave na arvore
+// Entrada: ponteiro para pagina de B+, chave a ser inserida
 noBMais inserir(noBMais, int);
 
-// Entrada: ponteiro para no de B+
+// Funcao para imprimir intervalo completo de chaves
+// Pre-condicao: nenhuma
+// Pos-condicao: nenhuma
+// Entrada: ponteiro para pagina de B+
 void ler_intervalo(noBMais);
 
-// Entrada: ponteiro para no de B+, chave a ser removida
+// Entrada: ponteiro para pagina de B+, chave a ser removida
 noBMais remover(noBMais, int);
 
-// Entrada: ponteiro para no de B+, valor a, valor b, modo de intervalo
+// Funcao chamadora para imprimir intervalo
+// Pre-condicao: nenhuma
+// Pos-condicao: nenhuma
+// Entrada: ponteiro para pagina de B+, valor a, valor b, modo de intervalo
 void imprimir_intervalo(noBMais, int, int, intervalo);
 
-// Entrada: ponteiro para no de B+
+// Funcao para imprimir por niveis
+// Pre-condicao: nenhuma
+// Pos-condicao: nenhuma
+// Entrada: ponteiro para pagina de B+
 void imprimir_niveis(noBMais);
 
 #endif // ARVORE_B_MAIS_H_INCLUDED
