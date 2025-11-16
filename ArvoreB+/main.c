@@ -53,6 +53,10 @@ int main()
 
     imprimir_intervalo(r, 11, 34, fechado);
 
+    int pos = 5;
+
+    printf("Busca: %d\n", busca(r, 5, &pos));
+
     printf("\ntotal nos internos: %d\n", conta_nos(r, interno));
     printf("\ntotal nos folhas: %d\n", conta_nos(r, folha));
     printf("\ntotal nos: %d\n", conta_nos(r, nosTotais));
