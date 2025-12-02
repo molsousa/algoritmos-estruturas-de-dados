@@ -3,26 +3,30 @@
 #include "../include/trie.h"
 
 // Estrutura para arvore Trie
-struct no{
+struct noTST{
     char letra;
     int valor;
-    struct no* esq;
-    struct no* meio;
-    struct no* dir;
+    struct noTST* esq;
+    struct noTST* meio;
+    struct noTST* dir;
 };
 
 // Funcao para criar arvore Trie
 // Pre-condicao: nenhuma
 // Pos-condicao: nenhuma
-Trie criar_arvore()
+TST_TRIE* criar_arvore()
 {
-    return NULL;
+    TST_TRIE* h = malloc(sizeof(TST_TRIE));
+
+    *h = NULL;
+
+    return h;
 }
 
 // Funcao para verificar se um no eh nulo
 // Pre-condicao: nenhuma
 // Pos-condicao: retorna 1 se nulo
-int vazia(Trie h)
+boolean vazia(TST_TRIE h)
 {
     return (h == NULL);
 }
@@ -30,64 +34,76 @@ int vazia(Trie h)
 // Funcao para liberar arvore
 // Pre-condicao: arvore criada
 // Pos-condicao: retorna nulo para ponteiro Trie
-Trie liberar(Trie h)
+static void liberar_aux(TST_TRIE h)
 {
     if(vazia(h))
-        return h;
+        return;
 
-    liberar(h->esq);
-    liberar(h->meio);
-    liberar(h->dir);
+    liberar_aux(h->esq);
+    liberar_aux(h->meio);
+    liberar_aux(h->dir);
 
     free(h);
+}
+
+TST_TRIE* liberar(TST_TRIE* h)
+{
+    liberar_aux(*h);
+
+    free(h);
+
     return NULL;
 }
 
 // Funcao para inserir palavra na arvore
 // Pre-condicao: nenhuma
 // Pos-condicao: nenhuma
-Trie inserir(Trie h, char* palavra, int valor)
+static TST_TRIE inserir_aux(TST_TRIE h, char* palavra, int valor)
 {
     if(vazia(h)){
-        h = malloc(sizeof(struct no));
+        h = malloc(sizeof(struct noTST));
         h->letra = *palavra;
         h->esq = h->dir = h->meio = NULL;
         h->valor = -1;
 
         if(*(palavra+1) != '\0')
-            h->meio = inserir(h->meio, palavra+1, valor);
+            h->meio = inserir_aux(h->meio, palavra+1, valor);
 
         else
             h->valor = valor;
     }
 
-    else{
+    else
         if(h->letra == *palavra)
-            h->meio = inserir(h->meio, palavra+1, valor);
+            h->meio = inserir_aux(h->meio, palavra+1, valor);
 
         else if(h->letra > *palavra)
-            h->esq = inserir(h->esq, palavra, valor);
+            h->esq = inserir_aux(h->esq, palavra, valor);
 
         else if(h->letra < *palavra)
-            h->dir = inserir(h->dir, palavra, valor);
-    }
+            h->dir = inserir_aux(h->dir, palavra, valor);
 
     return h;
+}
+
+void inserir(TST_TRIE* h, char* palavra, int valor)
+{
+    *h = inserir_aux(*h, palavra, valor);
 }
 
 // Funcao para remover uma palavra
 // Pre-condicao: arvore criada
 // Pos-condicao: nenhuma
-Trie remover(Trie h, char* palavra)
+static TST_TRIE remover_aux(TST_TRIE h, char* palavra)
 {
     if(vazia(h))
         return h;
 
     if(*palavra < h->letra)
-        h->esq = remover(h->esq, palavra);
+        h->esq = remover_aux(h->esq, palavra);
 
     else if(*palavra > h->letra)
-        h->dir = remover(h->dir, palavra);
+        h->dir = remover_aux(h->dir, palavra);
 
     else{
         if(*(palavra+1) == '\0'){
@@ -98,7 +114,7 @@ Trie remover(Trie h, char* palavra)
             }
         }
         else
-            h->meio = remover(h->meio, palavra+1);
+            h->meio = remover_aux(h->meio, palavra+1);
 
         if(h->meio == NULL && h->valor == -1){
             free(h);
@@ -108,10 +124,15 @@ Trie remover(Trie h, char* palavra)
     return h;
 }
 
+void remover(TST_TRIE* h, char* palavra)
+{
+    *h = remover_aux(*h, palavra);
+}
+
 // Funcao auxiliar para imprimir arvore
 // Pre-condicao: arvore criada
 // Pos-condicao: nenhuma
-void imprimir_aux(Trie h, char* buffer, int n)
+static void imprimir_aux(TST_TRIE h, char* buffer, int n)
 {
     if(vazia(h))
         return;
@@ -132,43 +153,19 @@ void imprimir_aux(Trie h, char* buffer, int n)
 // Funcao para imprimir arvore
 // Pre-condicao: arvore criada
 // Pos-condicao: nenhuma
-void imprimir(Trie h)
+void imprimir(TST_TRIE* h)
 {
     char* buffer = calloc(TAM, sizeof(char));
 
-    imprimir_aux(h, buffer, 0);
+    imprimir_aux(*h, buffer, 0);
 
     free(buffer);
-}
-
-// Funcao para buscar palavra
-// Pre-condicao: nenhuma
-// Pos-condicao: nenhuma
-void busca(Trie h, char* palavra)
-{
-    if(vazia(h))
-        return;
-
-    if(h->letra == *palavra){
-        printf("%c", h->letra);
-
-        if(h->valor != -1)
-            printf(" | %d\n", h->valor);
-
-        busca(h->meio, palavra+1);
-    }
-
-    else if(h->letra > *palavra)
-        busca(h->esq, palavra);
-
-    else
-        busca(h->dir, palavra);
 }
 
 // Funcao auxiliar para buscar nome inserindo valor
 // Pre-condicao: nenhuma
 // Pos-condicao: nenhuma
-void busca_dicionario_aux(Trie h, char* buffer, int valor, int n)
+static void busca_dicionario_aux(TST_TRIE h, char* buffer, int valor, int n)
 {
     if(vazia(h))
         return;
@@ -190,11 +187,29 @@ void busca_dicionario_aux(Trie h, char* buffer, int valor, int n)
 // Funcao para buscar nome inserindo valor
 // Pre-condicao: arvore criada
 // Pos-condicao: nenhuma
-void busca_dicionario(Trie h, int valor)
+void busca_dicionario(TST_TRIE* h, int valor)
 {
     char* buffer = calloc(TAM, sizeof(char));
 
-    busca_dicionario_aux(h, buffer, valor, 0);
+    busca_dicionario_aux(*h, buffer, valor, 0);
 
     free(buffer);
+}
+
+static void imprimir_dicionario_aux(TST_TRIE h)
+{
+    if(vazia(h))
+        return;
+
+    if(h->valor != -1)
+        printf("%d\n", h->valor);
+
+    imprimir_dicionario_aux(h->esq);
+    imprimir_dicionario_aux(h->meio);
+    imprimir_dicionario_aux(h->dir);
+}
+
+void imprimir_dicionario(TST_TRIE* h)
+{
+    imprimir_dicionario_aux(*h);
 }

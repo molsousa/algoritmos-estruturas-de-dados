@@ -3,56 +3,50 @@
 #define TAM 100
 
 // Definicao de tipo para arvore trie
-typedef struct no* Trie;
+typedef struct noTST* TST_TRIE;
+// Definicao de tipo booleano
+typedef enum{false = 0, true = 1}boolean;
 
 // Funcao para criar arvore Trie
 // Pre-condicao: nenhuma
 // Pos-condicao: nenhuma
-Trie criar_arvore();
+TST_TRIE* criar_arvore();
 
 // Funcao para verificar se um no eh nulo
 // Pre-condicao: nenhuma
 // Pos-condicao: retorna 1 se nulo
-int vazia(Trie h);
+boolean vazia(TST_TRIE h);
 
 // Funcao para liberar arvore
 // Pre-condicao: arvore criada
 // Pos-condicao: retorna nulo para ponteiro Trie
-Trie liberar(Trie h);
+TST_TRIE* liberar(TST_TRIE* h);
 
 // Funcao para inserir palavra na arvore
 // Pre-condicao: nenhuma
 // Pos-condicao: nenhuma
-Trie inserir(Trie h, char* palavra, int valor);
+void inserir(TST_TRIE* h, char* palavra, int valor);
 
 // Funcao  para remover uma palavra
 // Pre-condicao: arvore criada
 // Pos-condicao: nenhuma
-Trie remover(Trie h, char* palavra);
-
-// Funcao auxiliar para imprimir arvore
-// Pre-condicao: arvore criada
-// Pos-condicao: nenhuma
-void imprimir_aux(Trie h, char* buffer, int n);
+void remover(TST_TRIE* h, char* palavra);
 
 // Funcao para imprimir arvore
 // Pre-condicao: arvore criada
 // Pos-condicao: nenhuma
-void imprimir(Trie h);
+void imprimir(TST_TRIE* h);
 
 // Funcao para buscar palavra
 // Pre-condicao: nenhuma
 // Pos-condicao: nenhuma
-void busca(Trie h, char* palavra);
-
-// Funcao auxiliar para buscar nome inserindo valor
-// Pre-condicao: nenhuma
-// Pos-condicao: nenhuma
-void busca_dicionario_aux(Trie h, char* buffer, int valor, int n);
+void busca(TST_TRIE* h, char* palavra);
 
 // Funcao para buscar nome inserindo valor
 // Pre-condicao: arvore criada
 // Pos-condicao: nenhuma
-void busca_dicionario(Trie h, int valor);
+void busca_dicionario(TST_TRIE* h, int valor);
+
+void imprimir_dicionario(TST_TRIE* h);
 
 #endif
