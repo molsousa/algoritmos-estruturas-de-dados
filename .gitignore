@@ -4,3 +4,5 @@
 *.depend
 *.cbp
 *.bin
+*.out
+*.kdev4
