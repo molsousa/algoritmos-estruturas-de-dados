@@ -73,7 +73,8 @@ typedef struct{
 
 ---
 
-<img width="771" height="362" alt="ArvoreAVL" src="https://github.com/user-attachments/assets/9099318a-6f21-4222-bea6-d80123f48a36" />
+<img width="771" height="362" alt="ArvoreAVL" src="https://github.com/user-attachments/assets/f8e59e64-d31d-4135-bd92-4d554b1ce8b4" />
+
 
 ## Árvore Rubro Negra
 
