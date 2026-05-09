@@ -176,34 +176,26 @@ void quickSort(int* v, int n)
 // Tempo de complexidade no medio caso
 // Comparacoes: O(n log n)
 // Troca: O(n log n)
-void shellSort(int* v, int n)
-{
-    int i, j, k, s, w;
-    int a[n], temp;
+void shellSort(int *v, int n) {
+    int i, j, valor, k;
+    int h = 1;
 
-    for(i = 0; i < n; i++)
-        a[i] = v[i];
+    while(h < n)
+        h = 3*h+1;
 
-    for(w = 0; w < n; w++){
-        k = a[w];
-        s = -k;
-
-        for(i = k; i < n; i++){
-            temp = v[i];
-            j = i - k;
-
-            if(s == 0){
-                s = -k;
-                s++;
-                v[s] = temp;
+    while(h > 0){
+        for(i = h; i < n; i++){
+            for(k = 0; k < n; k++){
+                valor = v[i];
+                j = i;
+                while(j > h-1 && valor <= v[j-h]){
+                    v[j] = v[j-h];
+                    j = j - h;
+                }
+                v[j] = valor;
             }
-
-            while(temp < v[j] && j >= 0 && j <= n){
-                v[j+k] = v[j];
-                j -= k;
-            }
-            v[j + k] = temp;
         }
+        h = h/3;
     }
 }
 
